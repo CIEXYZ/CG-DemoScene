@@ -52,7 +52,7 @@ std::unique_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& 
 
 //Placeholder texture
 std::unique_ptr<ppgso::Texture> ModelLoader::createWhiteTexture() {
-    return std::make_unique<ppgso::Texture>(ppgso::image::loadBMP("../data/asteroid.bmp")); //TODO: check for this fucker if it is used somewhere
+    return std::make_unique<ppgso::Texture>(ppgso::image::loadBMP("asteroid.bmp"));
 }
 
 std::string ModelLoader::findTextureFile(const std::string& texturePath, const std::string& baseDir) {

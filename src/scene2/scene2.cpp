@@ -1,5 +1,4 @@
 #include <iostream>
-// #include <filesystem>
 
 #include <ppgso/ppgso.h>
 #include <shaders/color_frag_glsl.h>
@@ -31,41 +30,37 @@ private:
 
   //Loading all models
   void loadObjects() {
-
-    // std::cout << "Current working directory: "
-    //         << std::filesystem::current_path() << std::endl;
-
-    auto building = std::make_shared<Object>("../src/scene2/models/building/scene.gltf");
+    auto building = std::make_shared<Object>("models/building/scene.gltf");
     building->position = {0.0f, 0.0f, 0.0f};
     building->rotation = {0.0f, 0.0f, 0.0f};
     building->scale = {.01f, .01f, .01f};
     scene.objects.push_back(building); //Main Building
 
-    auto man = std::make_shared<Object>("../src/scene2/models/people/male/scene.gltf");
+    auto man = std::make_shared<Object>("models/people/male/scene.gltf");
     man->position = {7.0f, 0.0f, .0f};
     man->rotation = {0.0f, 0.0f, 0.0f};
     man->scale = {.01f, .01f, .01f};
     scene.objects.push_back(man); //Man with default texture
 
-    auto man1 = std::make_shared<Object>(man->getMesh(), "../src/scene2/models/people/male/textures/hero_baseColor-red.png");
+    auto man1 = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
     man1->position = {8.0f, 0.0f, .0f};
     man1->rotation = {0.0f, 0.0f, 0.0f};
     man1->scale = {.01f, .01f, .01f};
     scene.objects.push_back(man1); //Man with different texture
 
-    // auto woman = std::make_shared<Object>("D:\\C#\\PPGSO\\ppgso-public\\src\\scene2\\models\\people\\female\\scene.gltf");
+    // auto woman = std::make_shared<Object>("models/people/female/scene.gltf");
     // woman->position = {9.0f, 0.0f, .0f};
     // woman->rotation = {0.0f, 0.0f, 0.0f};
     // woman->scale = {.01f, .01f, .01f};
     // scene.objects.push_back(woman); //Woman
 
-    auto danceFloor = std::make_shared<Object>("../src/scene2/models/dance_floor/scene.gltf");
+    auto danceFloor = std::make_shared<Object>("models/dance_floor/scene.gltf");
     danceFloor->position = {0.0f, -0.05f, 0.15f};
     danceFloor->rotation = {0.0f, 0.0f, 0.0f};
     danceFloor->scale = {.185f, .185f, .185f};
     scene.objects.push_back(danceFloor); //Dance floor
 
-    auto discoBall = std::make_shared<Object>("../src/scene2/models/disco_ball/scene.gltf");
+    auto discoBall = std::make_shared<Object>("models/disco_ball/scene.gltf");
     discoBall->position = {0.0f, 5.5f, 0.0f};
     discoBall->rotation = {0.0f, 0.0f, 0.0f};
     discoBall->scale = {1.5f, 1.5f, 1.5f};
