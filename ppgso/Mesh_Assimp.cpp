@@ -1,8 +1,12 @@
 #include <glm/glm.hpp>
 #include <sstream>
-#include <filesystem>
 
 #include "Mesh_Assimp.h"
+
+std::string getParentPath(const std::string& path) {
+    auto pos = path.find_last_of("/\\");
+    return (pos == std::string::npos) ? "" : path.substr(0, pos);
+}
 
 ppgso::Mesh_Assimp::Mesh_Assimp(const std::string &obj_file) {
 #ifdef DEBBUG_MODE
@@ -10,7 +14,7 @@ ppgso::Mesh_Assimp::Mesh_Assimp(const std::string &obj_file) {
 #endif
 
     // Store base path for later use
-    basePath = std::filesystem::path(obj_file).parent_path().string();
+    basePath = getParentPath(obj_file);
 
     // Load the scene - importer is now a member so scene stays valid
     scene = importer.ReadFile(obj_file, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -74,7 +78,6 @@ ppgso::Mesh_Assimp::Mesh_Assimp(const std::string &obj_file) {
             material->GetTexture(aiTextureType_SPECULAR, 0, &texPath);
             std::cout << "  Specular texture: " << texPath.C_Str() << std::endl;
         }
-
         textures.push_back(std::move(matTextures));
     }
 }
@@ -130,7 +133,6 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh) {
             aiVector3D texCoord = mesh->mTextureCoords[0][i]; // Assuming single texture channel (index 0)
             textureCoords.push_back(aiVector2D(texCoord.x, texCoord.y));
         }
-
         glGenBuffers(1, &buffer.tbo);
         glBindBuffer(GL_ARRAY_BUFFER, buffer.tbo);
         glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(aiVector2D), textureCoords.data(), GL_STATIC_DRAW);
@@ -138,7 +140,6 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh) {
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
-
 
     // Process normals
     if (mesh->HasNormals()) {
@@ -156,7 +157,6 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh) {
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
 
-
     // Process indices
     if (mesh->HasFaces()) {
         std::vector<unsigned int> indices;
@@ -173,7 +173,6 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh) {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
         buffer.size = static_cast<GLsizei>(indices.size());
     }
-
     buffers.push_back(buffer);
 }
 
