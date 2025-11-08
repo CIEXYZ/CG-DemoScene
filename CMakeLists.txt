@@ -151,7 +151,9 @@ target_include_directories(ppgso PUBLIC
         ${OPENGL_INCLUDE_DIRS}
         ${ASSIMP_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR})
+        ${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_SOURCE_DIR}/dependencies/include
+)
 
 #
 # TARGETS
