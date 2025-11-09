@@ -12,7 +12,7 @@ project(ppgso CXX)
 # Basic CMake settings
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/_install)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
-set(CMAKE_CXX_STANDARD 17)                                                 ### Pouzivame C++17 pre filesystem
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data)
 
@@ -177,4 +177,22 @@ add_executable(scene2
 )
 target_link_libraries(scene2 ppgso shaders)
 install (TARGETS scene2 DESTINATION .)
-add_custom_command(TARGET scene2 POST_BUILD COMMAND  ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data/ ${CMAKE_CURRENT_BINARY_DIR})
+add_custom_command(TARGET scene2 POST_BUILD COMMAND  ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/scene2/models ${CMAKE_CURRENT_BINARY_DIR}/models)
+add_custom_command(TARGET scene2 POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data/ ${CMAKE_CURRENT_BINARY_DIR})
+
+# GL_9 scene example
+
+add_executable(gl9_scene
+        src/gl9_scene/gl9_scene.cpp
+        src/gl9_scene/object.cpp
+        src/gl9_scene/scene.cpp
+        src/gl9_scene/camera.cpp
+        src/gl9_scene/asteroid.cpp
+        src/gl9_scene/generator.cpp
+        src/gl9_scene/player.cpp
+        src/gl9_scene/projectile.cpp
+        src/gl9_scene/explosion.cpp
+        src/gl9_scene/space.cpp)
+target_link_libraries(gl9_scene ppgso shaders)
+install(TARGETS gl9_scene DESTINATION .)
+add_custom_command(TARGET gl9_scene POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data/ ${CMAKE_CURRENT_BINARY_DIR})
