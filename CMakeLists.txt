@@ -152,7 +152,7 @@ target_include_directories(ppgso PUBLIC
         ${ASSIMP_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_SOURCE_DIR}/dependencies/include
+#        ${CMAKE_SOURCE_DIR}/dependencies/include
 )
 
 #
