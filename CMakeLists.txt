@@ -95,6 +95,7 @@ set(PPGSO_SHADER_SRC
         shader/color_vert.glsl shader/color_frag.glsl
         shader/convolution_vert.glsl shader/convolution_frag.glsl
         shader/diffuse_vert.glsl shader/diffuse_frag.glsl
+        shader/diffusetint_frag.glsl
         shader/texture_vert.glsl shader/texture_frag.glsl
         )
 add_resources(shaders ${PPGSO_SHADER_SRC})
@@ -174,6 +175,8 @@ add_executable(scene2
         src/scene2/camera.cpp
         src/scene2/grid.h
         src/scene2/ModelLoader.cpp
+        src/scene2/DanceFloorObject.h
+        src/scene2/DanceFloorObject.cpp
 )
 target_link_libraries(scene2 ppgso shaders)
 install (TARGETS scene2 DESTINATION .)
