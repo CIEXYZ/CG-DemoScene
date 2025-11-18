@@ -7,6 +7,7 @@
 #include <shaders/diffuse_frag_glsl.h>
 
 #include "scene.h"
+#include "DanceFloorObject.h"
 
 const unsigned int SIZE = 960;
 
@@ -48,19 +49,19 @@ private:
     man1->scale = {.01f, .01f, .01f};
     scene.objects.push_back(man1); //Man with different texture
 
-    // auto woman = std::make_shared<Object>("models/people/female/scene.gltf");
-    // woman->position = {9.0f, 0.0f, .0f};
-    // woman->rotation = {0.0f, 0.0f, 0.0f};
-    // woman->scale = {.01f, .01f, .01f};
-    // scene.objects.push_back(woman); //Woman
+    auto woman = std::make_shared<Object>("models/people/female/scene.gltf");
+    woman->position = {9.0f, 0.0f, 0.0f};
+    woman->rotation = {0.0f, 0.0f, 0.0f};
+    woman->scale = {1.1f, 1.1f, 1.1f};
+    scene.objects.push_back(woman); //Woman
 
-    auto danceFloor = std::make_shared<Object>("models/dance_floor/scene.gltf");
+    auto danceFloor = std::make_shared<DanceFloorObject>();
     danceFloor->position = {0.0f, -0.05f, 0.15f};
     danceFloor->rotation = {0.0f, 0.0f, 0.0f};
-    danceFloor->scale = {.185f, .185f, .185f};
+    danceFloor->scale = {0.35f, 0.35f, 0.35f};
     scene.objects.push_back(danceFloor); //Dance floor
 
-    auto discoBall = std::make_shared<Object>("models/disco_ball/scene.gltf");
+    auto discoBall = std::make_shared<Object>("models/disco_ball/scene.gltf"); //TODO: fix texture
     discoBall->position = {0.0f, 5.5f, 0.0f};
     discoBall->rotation = {0.0f, 0.0f, 0.0f};
     discoBall->scale = {1.5f, 1.5f, 1.5f};
