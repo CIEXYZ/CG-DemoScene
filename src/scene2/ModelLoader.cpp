@@ -160,9 +160,6 @@ void TransparentTexture::load(const std::string& path) {
         std::cerr << "Failed to load transparent PNG: " << path << std::endl;
         return;
     }
-    else {
-        std::cout << "Loaded transparent PNG: " << path << std::endl;
-    }
 
     // Get the current texture ID
     GLuint oldTexture = getTexture();

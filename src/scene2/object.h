@@ -5,6 +5,7 @@
 #include <memory>
 #include <map>
 #include "Mesh_Assimp.h"
+#include "AABB.h"
 
 class Scene;
 
@@ -14,8 +15,24 @@ public:
   glm::vec3 rotation{0,0,0};
   glm::vec3 scale{1,1,1};
   glm::mat4 modelMatrix{1};
-  bool billboarding = false;
+  glm::vec3 velocity{0.f};
+
   float transparency = 1.f;
+  bool billboarding = false;
+  bool hasCollision = false; //turn on for objects that need it
+  bool usesGravity = false;
+  bool isStatic = true;
+
+  AABB boundingBox;
+
+  glm::vec3 boxSize = glm::vec3(1.f);
+  glm::vec3 boxOffset = glm::vec3(0.0f);
+
+  //====something========
+  static std::shared_ptr<Object> coloredObject(
+  const glm::vec3 &position,
+  const glm::vec3 &scale
+  );
 
   Object() = default;
   Object(const std::string& modelPath);
@@ -29,6 +46,8 @@ public:
   void setShader(const std::string& vertShader, const std::string& fragShader);
 
   std::shared_ptr<ppgso::Mesh_Assimp> getMesh() const { return mesh; }
+
+  bool collidesWithOther(const Object &otherObject) const;
 
 protected:
   void generateModelMatrix();

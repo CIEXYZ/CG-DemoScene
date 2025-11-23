@@ -10,6 +10,18 @@
 #include <shaders/diffuse_vert_glsl.h>
 #include <shaders/diffuse_frag_glsl.h>
 
+//======something========
+std::shared_ptr<Object> Object::coloredObject(const glm::vec3& position, const glm::vec3& scale) {
+
+    auto obj = std::make_shared<Object>("models/smoke_cloud/plane.obj");
+    obj->position = position;
+    obj->scale = scale;
+    obj->materialTextures[0] = ModelLoader::createWhiteTexture();
+
+    return obj;
+}
+
+
 Object::Object(const std::string& modelPath) {
     shader = std::make_unique<ppgso::Shader>(diffuse_vert_glsl, diffuse_frag_glsl);
     mesh = std::make_shared<ppgso::Mesh_Assimp>(modelPath);
@@ -49,6 +61,10 @@ void Object::setShader(const std::string& vertShader, const std::string& fragSha
 void Object::update(Scene &scene, float dt) {
     modelMatrix = glm::mat4(1.0f);
 
+    if (hasCollision) {
+        boundingBox.update(position, scale * boxSize, boxOffset);
+    }
+
     if (billboarding) {
         glm::mat4 viewMatrix = scene.camera->viewMatrix;
 
@@ -70,6 +86,31 @@ void Object::update(Scene &scene, float dt) {
         modelMatrix = glm::rotate(modelMatrix, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
         modelMatrix = glm::scale(modelMatrix, scale);
     }
+
+    if (usesGravity && !isStatic) {
+        velocity.y = velocity.y - 9.81f *dt;
+        position = position + (velocity* 0.01f) * dt;
+
+        if (hasCollision) {
+            boundingBox.update(position, scale * boxSize, boxOffset);
+        }
+
+        for (auto &obj : scene.objects) {
+            bool shouldResponse = obj.get() != this && obj->hasCollision && collidesWithOther(*obj);
+
+            if (shouldResponse && velocity.y < 0.0f) { //this statement NEVER TRIGGERS
+                velocity.y = 0.0f;
+                position.y = obj->boundingBox.max.y + (boundingBox.getSize().y * .5f);
+                boundingBox.update(position, scale * boxSize, boxOffset);
+                break;
+            }
+        }
+    }
+
+    if (hasCollision) {
+        boundingBox.update(position, scale * boxSize, boxOffset);
+    }
+
 }
 
 void Object::render(Scene &scene) {
@@ -113,4 +154,10 @@ void Object::generateModelMatrix() {
             glm::translate(glm::mat4(1.0f), position)
             * glm::orientate4(rotation)
             * glm::scale(glm::mat4(1.0f), scale);
+}
+
+bool Object::collidesWithOther(const Object &otherObject) const {
+    if (hasCollision || otherObject.hasCollision) {
+        return boundingBox.collidesWithOther(otherObject.boundingBox);
+    }
 }

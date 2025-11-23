@@ -15,7 +15,7 @@ public:
 
   // Camera control
   float moveSpeed = 10.0f;
-  float rotationSpeed = 0.1f;
+  float rotationSpeed = 0.5f;
   float yaw = 0.0f;
   float pitch = 0.0f;
 

@@ -175,8 +175,8 @@ add_executable(scene2
         src/scene2/camera.cpp
         src/scene2/grid.h
         src/scene2/ModelLoader.cpp
-        src/scene2/Particle.cpp
-        src/scene2/Particle.h
+        src/scene2/AABB.cpp
+        src/scene2/AABB.h
         src/scene2/SmokeCloud.cpp
         src/scene2/SmokeCloud.h
         src/scene2/Emitter.h

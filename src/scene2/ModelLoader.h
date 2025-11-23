@@ -16,7 +16,7 @@ public:
     
     // Create a default placeholder texture
     static std::unique_ptr<ppgso::Texture> createWhiteTexture();
-    
+
 private:
     // Load image using stb_image
     static ppgso::Image loadImageFile(const std::string& filename);
