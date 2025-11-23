@@ -6,6 +6,7 @@
 #include <shaders/diffuse_vert_glsl.h>
 #include <shaders/diffuse_frag_glsl.h>
 
+#include "Emitter.h"
 #include "scene.h"
 #include "DanceFloorObject.h"
 
@@ -66,6 +67,13 @@ private:
     discoBall->rotation = {0.0f, 0.0f, 0.0f};
     discoBall->scale = {1.5f, 1.5f, 1.5f};
     scene.objects.push_back(discoBall); //Disco ball
+
+    auto quadMesh = std::make_shared<ppgso::Mesh_Assimp>("models/smoke_cloud/plane.obj");
+    auto smokeCloud = std::make_unique<Emitter>(quadMesh, "models/smoke_cloud/smoke_cloud_transparent.png");
+    smokeCloud->position = {0.0f, 0.0f, 0.0f};
+    smokeCloud->spawnPosition = {0.0f, 0.4f, 0.0f};
+    smokeCloud->spawnRate = 3.f;
+    scene.objects.push_back(std::move(smokeCloud));
   }
 
   //Create scene

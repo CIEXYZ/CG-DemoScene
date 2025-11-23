@@ -14,6 +14,8 @@ public:
   glm::vec3 rotation{0,0,0};
   glm::vec3 scale{1,1,1};
   glm::mat4 modelMatrix{1};
+  bool billboarding = false;
+  float transparency = 1.f;
 
   Object() = default;
   Object(const std::string& modelPath);

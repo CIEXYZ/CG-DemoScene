@@ -56,7 +56,11 @@ std::unique_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& 
     try {
         if (ext == ".bmp") {
             return std::make_unique<ppgso::Texture>(ppgso::image::loadBMP(path));
-        } else {
+        }
+        if (ext == ".png") {
+           return std::make_unique<TransparentTexture>(path);
+        }
+        else {
             return std::make_unique<ppgso::Texture>(loadImageFile(path));
         }
     } catch (const std::exception& e) {
@@ -140,4 +144,46 @@ std::map<unsigned int, std::unique_ptr<ppgso::Texture>> ModelLoader::loadTexture
     std::cout << "\nTotal textures loaded: " << materialTextures.size() << std::endl;
 
     return materialTextures;
+}
+
+
+TransparentTexture::TransparentTexture(const std::string& path) : ppgso::Texture(1, 1) {
+    load(path);
+}
+
+void TransparentTexture::load(const std::string& path) {
+    int width, height, channels;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 4);
+
+    if (!data) {
+        std::cerr << "Failed to load transparent PNG: " << path << std::endl;
+        return;
+    }
+    else {
+        std::cout << "Loaded transparent PNG: " << path << std::endl;
+    }
+
+    // Get the current texture ID
+    GLuint oldTexture = getTexture();
+    glDeleteTextures(1, &oldTexture);
+
+    // Create new RGBA texture
+    GLuint newTexture;
+    glGenTextures(1, &newTexture);
+    glBindTexture(GL_TEXTURE_2D, newTexture);
+
+    // Upload as RGBA8
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    stbi_image_free(data);
+
+    // Replace internal texture ID (access protected member)
+    texture = newTexture;
 }

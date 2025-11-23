@@ -50,7 +50,7 @@ namespace ppgso {
     void bind(int id = 0) const;
 
     Image image;
-  private:
+  protected:
     void initGL();
     GLuint texture;
   };

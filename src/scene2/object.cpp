@@ -49,12 +49,27 @@ void Object::setShader(const std::string& vertShader, const std::string& fragSha
 void Object::update(Scene &scene, float dt) {
     modelMatrix = glm::mat4(1.0f);
 
-    //Transformations
-    modelMatrix = glm::translate(modelMatrix, position);
-    modelMatrix = glm::rotate(modelMatrix, rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-    modelMatrix = glm::rotate(modelMatrix, rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-    modelMatrix = glm::rotate(modelMatrix, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-    modelMatrix = glm::scale(modelMatrix, scale);
+    if (billboarding) {
+        glm::mat4 viewMatrix = scene.camera->viewMatrix;
+
+        modelMatrix = glm::translate(modelMatrix, position);
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                modelMatrix[i][j] = viewMatrix[j][i];
+            }
+        }
+
+        modelMatrix = glm::scale(modelMatrix, scale);
+
+    } else {
+        //Transformations
+        modelMatrix = glm::translate(modelMatrix, position);
+        modelMatrix = glm::rotate(modelMatrix, rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+        modelMatrix = glm::rotate(modelMatrix, rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+        modelMatrix = glm::rotate(modelMatrix, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+        modelMatrix = glm::scale(modelMatrix, scale);
+    }
 }
 
 void Object::render(Scene &scene) {
@@ -67,6 +82,17 @@ void Object::render(Scene &scene) {
     glm::vec3 lightDirection = glm::normalize(glm::vec3(5.0f, 5.0f, 5.0f)); //TODO: Global lightning (potom pouzivat lightDirection zo scene.h)
     shader->setUniform("LightDirection", lightDirection);
 
+    if (billboarding) {
+        shader->setUniform("DisableLighting", true);
+        shader->setUniform("Transparency", transparency);
+
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+
+
     //Render all meshes with own textures
     mesh->renderWithMaterials([this](unsigned int materialIndex) {
       auto it = materialTextures.find(materialIndex);
@@ -74,6 +100,12 @@ void Object::render(Scene &scene) {
         shader->setUniform("Texture", *(it->second));
       }
     });
+
+    if (billboarding) {
+        shader->setUniform("DisableLighting", false);
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+    }
 }
 
 void Object::generateModelMatrix() {
