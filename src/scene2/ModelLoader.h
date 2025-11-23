@@ -24,11 +24,3 @@ private:
     // Find texture file with various path strategies
     static std::string findTextureFile(const std::string& texturePath, const std::string& baseDir);
 };
-
-
-class TransparentTexture : public ppgso::Texture {
-public:
-    TransparentTexture(const std::string& path);
-private:
-    void load(const std::string& path);
-};

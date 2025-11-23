@@ -5,11 +5,11 @@
 #include <GL/glew.h>
 
 #include <shaders/diffuse_vert_glsl.h>
-#include <shaders/diffusetint_frag_glsl.h>
+#include <shaders/diffuse_frag_glsl.h>
 
 DanceFloorObject::DanceFloorObject() {
-    shader = std::make_unique<ppgso::Shader>(diffuse_vert_glsl, diffusetint_frag_glsl);
-    texture = std::make_unique<ppgso::Texture>(ppgso::image::loadBMP("asteroid.bmp")); //TODO: replace asteroid
+    shader = std::make_unique<ppgso::Shader>(diffuse_vert_glsl, diffuse_frag_glsl);
+    texture = ModelLoader::createWhiteTexture();
 
     init();
     initGrid();

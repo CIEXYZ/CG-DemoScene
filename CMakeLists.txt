@@ -61,7 +61,7 @@ find_package(ASSIMP)
 
 if (ASSIMP_FOUND)
   add_definitions(-DUSE_ASSIMP=1)
-  
+
   if (WIN32 AND MINGW)
     set(ASSIMP_ROOT_DIR "${ASSIMP_ROOT_DIR}/bin/mingw/")
   elseif (WIN32 AND MSVC)
@@ -95,9 +95,8 @@ set(PPGSO_SHADER_SRC
         shader/color_vert.glsl shader/color_frag.glsl
         shader/convolution_vert.glsl shader/convolution_frag.glsl
         shader/diffuse_vert.glsl shader/diffuse_frag.glsl
-        shader/diffusetint_frag.glsl
         shader/texture_vert.glsl shader/texture_frag.glsl
-        )
+)
 add_resources(shaders ${PPGSO_SHADER_SRC})
 
 # PPGSO library
@@ -133,9 +132,9 @@ target_compile_definitions(ppgso PUBLIC -DGLM_FORCE_RADIANS -DGLEW_STATIC)
 # Edit by: Samuel Zaprazny
 # Linking assimp library
 if (ASSIMP_FOUND)
-    # Link to GLFW, GLEW. OpenGL and ASSIMP
-    target_link_libraries(ppgso PUBLIC ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} ${ASSIMP_LIBRARIES})
-    install(TARGETS ppgso DESTINATION .)
+  # Link to GLFW, GLEW. OpenGL and ASSIMP
+  target_link_libraries(ppgso PUBLIC ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} ${ASSIMP_LIBRARIES})
+  install(TARGETS ppgso DESTINATION .)
 else ()
   # Link to GLFW, GLEW. OpenGL without ASSIMP
   # Using Tiny Obj Loader
@@ -153,7 +152,7 @@ target_include_directories(ppgso PUBLIC
         ${ASSIMP_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
-#        ${CMAKE_SOURCE_DIR}/dependencies/include
+        #        ${CMAKE_SOURCE_DIR}/dependencies/include
 )
 
 #
