@@ -91,14 +91,12 @@ void Object::render(Scene &scene) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-
-
     //Render all meshes with own textures
     mesh->renderWithMaterials([this](unsigned int materialIndex) {
-      auto it = materialTextures.find(materialIndex);
-      if (it != materialTextures.end()) {
+        auto it = materialTextures.find(materialIndex);
+        if (it != materialTextures.end()) {
         shader->setUniform("Texture", *(it->second));
-      }
+        }
     });
 
     if (billboarding) {

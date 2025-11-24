@@ -35,31 +35,31 @@ private:
     auto building = std::make_shared<Object>("models/building/scene.gltf");
     building->position = {0.0f, 0.0f, 0.0f};
     building->rotation = {0.0f, 0.0f, 0.0f};
-    building->scale = {.01f, .01f, .01f};
+    building->scale = {1.0f, 1.0f, 1.0f};
     scene.objects.push_back(building); //Main Building
 
     auto man = std::make_shared<Object>("models/people/male/scene.gltf");
     man->position = {7.0f, 0.0f, .0f};
-    man->rotation = {0.0f, 0.0f, 0.0f};
+    man->rotation = {1.55f, 0.0f, 0.0f};
     man->scale = {.01f, .01f, .01f};
     scene.objects.push_back(man); //Man with default texture
 
     auto man1 = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
     man1->position = {8.0f, 0.0f, .0f};
-    man1->rotation = {0.0f, 0.0f, 0.0f};
+    man1->rotation = {1.55f, 0.0f, 0.0f};
     man1->scale = {.01f, .01f, .01f};
     scene.objects.push_back(man1); //Man with different texture
 
     auto woman = std::make_shared<Object>("models/people/female/scene.gltf");
     woman->position = {9.0f, 0.0f, 0.0f};
-    woman->rotation = {0.0f, 0.0f, 0.0f};
+    woman->rotation = {1.6, 0.0f, 0.0f};
     woman->scale = {1.1f, 1.1f, 1.1f};
     scene.objects.push_back(woman); //Woman
 
     auto danceFloor = std::make_shared<DanceFloorObject>();
-    danceFloor->position = {0.0f, -0.05f, 0.15f};
+    danceFloor->position = {0.0f, -0.05f, 0.0f};
     danceFloor->rotation = {0.0f, 0.0f, 0.0f};
-    danceFloor->scale = {0.35f, 0.35f, 0.35f};
+    danceFloor->scale = {0.3f, 0.3f, 0.3f};
     scene.objects.push_back(danceFloor); //Dance floor
 
     auto discoBall = std::make_shared<Object>("models/disco_ball/scene.gltf"); //TODO: fix texture

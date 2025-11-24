@@ -28,8 +28,9 @@ ppgso::Mesh_Assimp::Mesh_Assimp(const std::string &obj_file) {
     std::cout << "Model loaded successfully: " << obj_file << std::endl;
     std::cout << "Number of materials: " << scene->mNumMaterials << std::endl;
     std::cout << "Number of meshes: " << scene->mNumMeshes << std::endl;
+    std::cout << "Root node children: " << scene->mRootNode->mNumChildren << std::endl;
 
-    processNode(scene->mRootNode, scene);
+    processNode(scene->mRootNode, scene, glm::mat4(1.0f));
 
     // Load materials and their texture info
     for (unsigned int i = 0; i < scene->mNumMaterials; ++i) {
@@ -92,22 +93,33 @@ ppgso::Mesh_Assimp::~Mesh_Assimp() {
     }
 }
 
-void ppgso::Mesh_Assimp::processNode(aiNode *node, const aiScene *pScene) {
+void ppgso::Mesh_Assimp::processNode(aiNode *node, const aiScene *pScene, const glm::mat4& parentTransform) {
+    aiMatrix4x4 aiTrans = node->mTransformation;
+    glm::mat4 nodeTransform = glm::mat4(
+        aiTrans.a1, aiTrans.b1, aiTrans.c1, aiTrans.d1,
+        aiTrans.a2, aiTrans.b2, aiTrans.c2, aiTrans.d2,
+        aiTrans.a3, aiTrans.b3, aiTrans.c3, aiTrans.d3,
+        aiTrans.a4, aiTrans.b4, aiTrans.c4, aiTrans.d4
+    );
+
+    glm::mat4 globalTransform = parentTransform * nodeTransform;
+
     for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
         aiMesh *mesh = pScene->mMeshes[node->mMeshes[i]];
-        processMesh(mesh);
+        processMesh(mesh, globalTransform);
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; ++i) {
-        processNode(node->mChildren[i], pScene);
+        processNode(node->mChildren[i], pScene, globalTransform);
     }
 }
 
-void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh) {
+void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
     gl_buffer buffer;
 
     // Store material index for this mesh
     buffer.materialIndex = mesh->mMaterialIndex;
+    buffer.meshIndex = 0;
 
     std::cout << "Processing mesh with material index: " << buffer.materialIndex << std::endl;
 
@@ -117,10 +129,19 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh) {
         glGenVertexArrays(1, &buffer.vao);
         glBindVertexArray(buffer.vao);
 
+        std::vector<glm::vec3> transformedVertices;
+        transformedVertices.reserve(mesh->mNumVertices);
+
+        for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+            glm::vec4 vertex = glm::vec4(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z, 1.0f);
+            glm::vec4 transformedVertex = transform * vertex;
+            transformedVertices.push_back(glm::vec3(transformedVertex));
+        }
+
         // Extract vertex positions from aiMesh and upload to GPU
         glGenBuffers(1, &buffer.vbo);
         glBindBuffer(GL_ARRAY_BUFFER, buffer.vbo);
-        glBufferData(GL_ARRAY_BUFFER, mesh->mNumVertices * sizeof(aiVector3D), mesh->mVertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, transformedVertices.size() * sizeof(glm::vec3), transformedVertices.data(), GL_STATIC_DRAW);
         // Enable and set up vertex attribute pointer for positions
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
@@ -143,15 +164,20 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh) {
 
     // Process normals
     if (mesh->HasNormals()) {
-        std::vector<aiVector3D> normals;
+        std::vector<glm::vec3> transformedNormals;
+        transformedNormals.reserve(mesh->mNumVertices);
+
+        glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(transform)));
+
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-            aiVector3D normal = mesh->mNormals[i];
-            normals.push_back(normal);
+            glm::vec3 normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+            glm::vec3 transformedNormal = glm::normalize(normalMatrix * normal);
+            transformedNormals.push_back(transformedNormal);
         }
 
         glGenBuffers(1, &buffer.nbo);
         glBindBuffer(GL_ARRAY_BUFFER, buffer.nbo);
-        glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(aiVector3D), normals.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, transformedNormals.size() * sizeof(glm::vec3), transformedNormals.data(), GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);

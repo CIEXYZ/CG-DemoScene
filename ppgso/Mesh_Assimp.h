@@ -26,7 +26,8 @@ namespace ppgso {
         public:
             GLuint vao, vbo, tbo, nbo, ibo = 0;
             GLsizei size = 0;
-            unsigned int materialIndex = 0; // Added: material index for this mesh
+            unsigned int materialIndex = 0;
+            unsigned int meshIndex = 0;
         };
 
         std::vector<gl_buffer> buffers;
@@ -66,9 +67,9 @@ namespace ppgso {
 
         ~Mesh_Assimp();
 
-        void processNode(aiNode *node, const aiScene *pScene);
+        void processNode(aiNode *node, const aiScene *pScene, const glm::mat4& parentTransform);
 
-        void processMesh(aiMesh *mesh);
+        void processMesh(aiMesh *mesh, const glm::mat4& transform);
 
         const std::vector<MaterialTextures>& getTextures() const { return textures; }
 
