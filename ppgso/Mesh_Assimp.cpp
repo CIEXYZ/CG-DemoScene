@@ -117,11 +117,12 @@ void ppgso::Mesh_Assimp::processNode(aiNode *node, const aiScene *pScene, const 
 void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
     gl_buffer buffer;
 
-    // Store material index for this mesh
+    // Store material index and mesh name for this mesh
     buffer.materialIndex = mesh->mMaterialIndex;
     buffer.meshIndex = 0;
+    buffer.meshName = mesh->mName.C_Str();
 
-    std::cout << "Processing mesh with material index: " << buffer.materialIndex << std::endl;
+    std::cout << "Processing mesh: '" << buffer.meshName << "' with material index: " << buffer.materialIndex << std::endl;
 
     // Process vertices
     if (mesh->HasPositions()) {
@@ -210,10 +211,20 @@ void ppgso::Mesh_Assimp::render() {
     }
 }
 
-void ppgso::Mesh_Assimp::renderWithMaterials(std::function<void(unsigned int)> setMaterialCallback) {
-    for (auto &buffer : buffers) {
-        // Set material for this mesh part
-        setMaterialCallback(buffer.materialIndex);
+void ppgso::Mesh_Assimp::renderSingleMesh(size_t bufferIndex) {
+    if (bufferIndex < buffers.size()) {
+        auto &buffer = buffers[bufferIndex];
+        glBindVertexArray(buffer.vao);
+        glDrawElements(GL_TRIANGLES, buffer.size, GL_UNSIGNED_INT, nullptr);
+    }
+}
+
+void ppgso::Mesh_Assimp::renderWithMaterials(std::function<void(unsigned int, size_t)> setMaterialCallback) {
+    for (size_t i = 0; i < buffers.size(); ++i) {
+        auto &buffer = buffers[i];
+
+        // Set material for this mesh part, passing buffer index
+        setMaterialCallback(buffer.materialIndex, i);
 
         // Draw object
         glBindVertexArray(buffer.vao);

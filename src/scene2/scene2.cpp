@@ -32,12 +32,6 @@ private:
 
   //Loading all models
   void loadObjects() {
-    auto building = std::make_shared<Object>("models/building/scene.gltf");
-    building->position = {0.0f, 0.0f, 0.0f};
-    building->rotation = {0.0f, 0.0f, 0.0f};
-    building->scale = {1.0f, 1.0f, 1.0f};
-    scene.objects.push_back(building); //Main Building
-
     auto man = std::make_shared<Object>("models/people/male/scene.gltf");
     man->position = {7.0f, 0.0f, .0f};
     man->rotation = {1.55f, 0.0f, 0.0f};
@@ -67,6 +61,19 @@ private:
     discoBall->rotation = {0.0f, 0.0f, 0.0f};
     discoBall->scale = {1.5f, 1.5f, 1.5f};
     scene.objects.push_back(discoBall); //Disco ball
+
+    auto building = std::make_shared<Object>("models/building/scene.gltf");
+    building->position = {0.0f, 0.0f, 0.0f};
+    building->rotation = {0.0f, 0.0f, 0.0f};
+    building->scale = {1.0f, 1.0f, 1.0f};
+
+    building->setTransparentMeshes({"Glass", "Shot_Glass", "WineGlass",
+                                              "BeerBottle", "Large_Bottle", "Rectangle_Bottle",
+                                              "Sphere_Bottle", "Tall_Skinny_Bottle"});
+    building->transparency = .6f;
+
+    scene.objects.push_back(building); //Main Building
+
 
     // auto quadMesh = std::make_shared<ppgso::Mesh_Assimp>("models/smoke_cloud/plane.obj");
     // auto smokeCloud = std::make_unique<Emitter>(quadMesh, "models/smoke_cloud/smoke_cloud_transparent.png");

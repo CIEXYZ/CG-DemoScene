@@ -28,6 +28,7 @@ namespace ppgso {
             GLsizei size = 0;
             unsigned int materialIndex = 0;
             unsigned int meshIndex = 0;
+            std::string meshName;
         };
 
         std::vector<gl_buffer> buffers;
@@ -84,6 +85,14 @@ namespace ppgso {
         // Get number of meshes/buffers
         size_t getMeshCount() const { return buffers.size(); }
 
+        // Get mesh name for a specific buffer
+        std::string getMeshName(size_t bufferIndex) const {
+            if (bufferIndex < buffers.size()) {
+                return buffers[bufferIndex].meshName;
+            }
+            return "";
+        }
+
         // Get texture path for a material
         std::string getTexturePath(unsigned int materialIndex, aiTextureType type) const;
 
@@ -99,8 +108,13 @@ namespace ppgso {
         void render();
 
         /*!
+         * Render a single mesh by buffer index
+         */
+        void renderSingleMesh(size_t bufferIndex);
+
+        /*!
          * Render with callback for setting material per mesh part
          */
-        void renderWithMaterials(std::function<void(unsigned int)> setMaterialCallback);
+        void renderWithMaterials(std::function<void(unsigned int, size_t)> setMaterialCallback);
     };
 }
