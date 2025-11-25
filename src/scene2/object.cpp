@@ -88,8 +88,8 @@ void Object::update(Scene &scene, float dt) {
     }
 
     if (usesGravity && !isStatic) {
-        velocity.y = velocity.y - 9.81f *dt;
-        position = position + (velocity* 0.01f) * dt;
+        velocity.y = velocity.y - 9.81f *(dt*0.01);
+        position = position + (velocity) * dt;
 
         if (hasCollision) {
             boundingBox.update(position, scale * boxSize, boxOffset);
@@ -97,13 +97,15 @@ void Object::update(Scene &scene, float dt) {
 
         for (auto &obj : scene.objects) {
             bool shouldResponse = obj.get() != this && obj->hasCollision && collidesWithOther(*obj);
+            // if (obj.get() != this && obj->hasCollision && collidesWithOther(*obj)) {
 
-            if (shouldResponse && velocity.y < 0.0f) { //this statement NEVER TRIGGERS
-                velocity.y = 0.0f;
-                position.y = obj->boundingBox.max.y + (boundingBox.getSize().y * .5f);
-                boundingBox.update(position, scale * boxSize, boxOffset);
-                break;
-            }
+                if (shouldResponse && velocity.y < 0.0f) {
+                    velocity.y = 0.0f;
+                    position.y = obj->boundingBox.max.y + (boundingBox.getSize().y * .5f);
+                    boundingBox.update(position, scale * boxSize, boxOffset);
+                    break;
+                }
+            // }
         }
     }
 
