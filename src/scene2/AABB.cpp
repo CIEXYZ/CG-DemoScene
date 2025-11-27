@@ -20,6 +20,12 @@ bool AABB::collidesWithOther(const AABB &otherObject) const {
     bool yCollision = min.y <= otherObject.max.y && max.y >= otherObject.min.y;
     bool zCollision = min.z <= otherObject.max.z && max.z >= otherObject.min.z;
 
+    std::cout << "This AABB: min(" << min.x << ", " << min.y << ", " << min.z
+             << ") max(" << max.x << ", " << max.y << ", " << max.z << ")" << std::endl;
+    std::cout << "Other AABB: min(" << otherObject.min.x << ", " << otherObject.min.y << ", " << otherObject.min.z
+              << ") max(" << otherObject.max.x << ", " << otherObject.max.y << ", " << otherObject.max.z << ")" << std::endl;
+    std::cout << "Collisions: X=" << xCollision << " Y=" << yCollision << " Z=" << zCollision << std::endl;
+
     return xCollision && yCollision && zCollision;
 }
 

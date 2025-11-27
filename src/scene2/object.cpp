@@ -88,7 +88,10 @@ void Object::update(Scene &scene, float dt) {
     }
 
     if (usesGravity && !isStatic) {
-        velocity.y = velocity.y - 9.81f *(dt*0.01);
+        // velocity.y = velocity.y - 9.81f *(dt*0.01);
+        velocity.x = velocity.x + 9.81f *(dt*0.01); // zastavi sa to az v strede objektu cize je tam nejaky overlap co nie je idealne
+        // velocity.z = velocity.z + 9.81f *(dt*0.01); // toto sme nejako poriesili zle som nastavoval hodnotu boxsize
+        oldPosition = position;
         position = position + (velocity) * dt;
 
         if (hasCollision) {
@@ -97,15 +100,21 @@ void Object::update(Scene &scene, float dt) {
 
         for (auto &obj : scene.objects) {
             bool shouldResponse = obj.get() != this && obj->hasCollision && collidesWithOther(*obj);
-            // if (obj.get() != this && obj->hasCollision && collidesWithOther(*obj)) {
 
-                if (shouldResponse && velocity.y < 0.0f) {
-                    velocity.y = 0.0f;
-                    position.y = obj->boundingBox.max.y + (boundingBox.getSize().y * .5f);
-                    boundingBox.update(position, scale * boxSize, boxOffset);
-                    break;
+            if (shouldResponse) {
+                std::cout<<"collision"<<std::endl;
+
+                if (velocity.y < .0f) {
+                    stopOnYAxis(obj);
                 }
-            // }
+                if (velocity.x != .0f) {
+                    stopOnXAxis(obj);
+                }
+                if (velocity.z != .0f) {
+                    stopOnZAxis(obj);
+                }
+                break;
+            }
         }
     }
 
@@ -113,6 +122,33 @@ void Object::update(Scene &scene, float dt) {
         boundingBox.update(position, scale * boxSize, boxOffset);
     }
 
+}
+
+void Object::stopOnYAxis(std::shared_ptr<Object> &obj) {
+    velocity.y = 0.0f;
+    position.y = obj->boundingBox.max.y + (boundingBox.getSize().y * .5f);
+    boundingBox.update(position, scale * boxSize, boxOffset);
+}
+
+void Object::stopOnXAxis(std::shared_ptr<Object> &obj) {
+    if (oldPosition.x < obj->position.x) {
+        position.x = obj->boundingBox.min.x - (boundingBox.getSize().x * .5f);
+    }else {
+        position.x = obj->boundingBox.max.x + (boundingBox.getSize().x * .5f);
+    }
+
+    velocity.x = 0.0f;
+    boundingBox.update(position, scale * boxSize, boxOffset);
+}
+
+void Object::stopOnZAxis(std::shared_ptr<Object> &obj) {
+    if (oldPosition.z < obj->position.z) {
+        position.z = obj->boundingBox.min.z - (boundingBox.getSize().z * .5f);
+    }else {
+        position.z = obj->boundingBox.max.z + (boundingBox.getSize().z * .5f);
+    }
+    velocity.z = .0f;
+    boundingBox.update(position, scale * boxSize, boxOffset);
 }
 
 void Object::render(Scene &scene) {

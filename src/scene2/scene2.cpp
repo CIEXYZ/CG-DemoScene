@@ -79,12 +79,12 @@ private:
     auto ground = Object::coloredObject({15.0f, 1.f, 0.f}, glm::vec3(1.f, 1.0f, 1.f));
     ground->rotation = {glm::radians(-90.f), 0.f, 0.f};
     ground->hasCollision = true;
-    ground->boxSize = glm::vec3(1.f, 1.f, .1f);
+    ground->boxSize = glm::vec3(1.f, 1.f, 1.f);
     scene.objects.push_back(ground);
 
-    auto fallingObject = Object::coloredObject({15.0f, 5.f, 0.f}, glm::vec3(1.f, 1.f, 1.f));
+    auto fallingObject = Object::coloredObject({10.0f, 1.f, 0.f}, glm::vec3(1.f, 1.f, 1.f));
     fallingObject->hasCollision = true;
-    fallingObject->boxSize = glm::vec3(1.f, 1.f, .1f);
+    fallingObject->boxSize = glm::vec3(1.f, 1.f, 1.f);
     fallingObject->usesGravity = true;
     fallingObject->isStatic = false;
     scene.objects.push_back(fallingObject);

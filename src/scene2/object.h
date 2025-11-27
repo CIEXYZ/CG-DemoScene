@@ -16,6 +16,7 @@ public:
   glm::vec3 scale{1,1,1};
   glm::mat4 modelMatrix{1};
   glm::vec3 velocity{0.f};
+  glm::vec3 oldPosition{0.f};
 
   float transparency = 1.f;
   bool billboarding = false;
@@ -40,6 +41,9 @@ public:
   virtual ~Object() = default;
 
   virtual void update(Scene &scene, float dt);
+  virtual void stopOnYAxis(std::shared_ptr<Object> &obj);
+  virtual void stopOnXAxis(std::shared_ptr<Object> &obj);
+  virtual void stopOnZAxis(std::shared_ptr<Object> &obj);
   virtual void render(Scene &scene);
 
   void setMesh(const std::string& meshPath);
