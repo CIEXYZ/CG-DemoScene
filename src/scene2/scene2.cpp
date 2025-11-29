@@ -76,17 +76,18 @@ private:
     scene.objects.push_back(std::move(smokeCloud));
 
     //=================collision and physics testing===========
-    auto ground = Object::coloredObject({15.0f, 1.f, 0.f}, glm::vec3(1.f, 1.0f, 1.f));
+    auto ground = Object::coloredObject({15.0f, 1.f, 0.f}, glm::vec3{1.0f, 1.0f, 1.0f});
     ground->rotation = {glm::radians(-90.f), 0.f, 0.f};
     ground->hasCollision = true;
-    ground->boxSize = glm::vec3(1.f, 1.f, 1.f);
+    ground->boxSize = glm::vec3(2.f, 2.f, 2.f);
     scene.objects.push_back(ground);
 
-    auto fallingObject = Object::coloredObject({10.0f, 1.f, 0.f}, glm::vec3(1.f, 1.f, 1.f));
+    auto fallingObject = Object::coloredObject({10.0f, 1.f, 0.f}, glm::vec3{1.0f, 1.0f, 1.0f});
     fallingObject->hasCollision = true;
-    fallingObject->boxSize = glm::vec3(1.f, 1.f, 1.f);
+    fallingObject->boxSize = glm::vec3(2.f, 2.f, 2.f); // the plane obj is 2
     fallingObject->usesGravity = true;
     fallingObject->isStatic = false;
+    fallingObject->velocity = glm::vec3(.5f, 0.0f, 0.0f);
     scene.objects.push_back(fallingObject);
   }
 

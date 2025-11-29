@@ -89,8 +89,7 @@ void Object::update(Scene &scene, float dt) {
 
     if (usesGravity && !isStatic) {
         // velocity.y = velocity.y - 9.81f *(dt*0.01);
-        velocity.x = velocity.x + 9.81f *(dt*0.01); // zastavi sa to az v strede objektu cize je tam nejaky overlap co nie je idealne
-        // velocity.z = velocity.z + 9.81f *(dt*0.01); // toto sme nejako poriesili zle som nastavoval hodnotu boxsize
+
         oldPosition = position;
         position = position + (velocity) * dt;
 
@@ -102,8 +101,6 @@ void Object::update(Scene &scene, float dt) {
             bool shouldResponse = obj.get() != this && obj->hasCollision && collidesWithOther(*obj);
 
             if (shouldResponse) {
-                std::cout<<"collision"<<std::endl;
-
                 if (velocity.y < .0f) {
                     stopOnYAxis(obj);
                 }
