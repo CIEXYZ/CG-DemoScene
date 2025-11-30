@@ -10,7 +10,8 @@
 #include "scene.h"
 #include "DanceFloorObject.h"
 
-const unsigned int SIZE = 960;
+const unsigned int WIDTH = 1280;
+const unsigned int HEIGHT = 720;
 
 //Main window
 class SceneWindow : public ppgso::Window {
@@ -26,9 +27,13 @@ private:
   float time = 0.0f;
 
   // Mouse tracking
-  double lastMouseX = SIZE / 2.0;
-  double lastMouseY = SIZE / 2.0;
+  double lastMouseX = WIDTH / 2.0;
+  double lastMouseY = HEIGHT / 2.0;
   bool firstMouse = true;
+
+  // Window size tracking
+  int currentWidth = WIDTH;
+  int currentHeight = HEIGHT;
 
   //Loading all models
   void loadObjects() {
@@ -57,9 +62,9 @@ private:
     scene.objects.push_back(danceFloor); //Dance floor
 
     auto discoBall = std::make_shared<Object>("models/disco_ball/scene.gltf"); //TODO: fix texture
-    discoBall->position = {0.0f, 5.5f, 0.0f};
+    discoBall->position = {0.0f, 4.6f, 0.0f};
     discoBall->rotation = {0.0f, 0.0f, 0.0f};
-    discoBall->scale = {1.5f, 1.5f, 1.5f};
+    discoBall->scale = {1.2f, 1.2f, 1.2f};
     scene.objects.push_back(discoBall); //Disco ball
 
     auto building = std::make_shared<Object>("models/building/scene.gltf");
@@ -70,17 +75,25 @@ private:
     building->setTransparentMeshes({"Glass", "Shot_Glass", "WineGlass",
                                               "BeerBottle", "Large_Bottle", "Rectangle_Bottle",
                                               "Sphere_Bottle", "Tall_Skinny_Bottle"});
-    building->transparency = .6f;
+    building->transparency = 3.f;
 
     scene.objects.push_back(building); //Main Building
 
+    auto whiskeyGlass = std::make_shared<Object>("models/whiskey_glass/scene.gltf");
+    whiskeyGlass->position = {-3.1f, .95f, 0.0f};
+    whiskeyGlass->rotation = {0.0f, 0.0f, 0.0f};
+    whiskeyGlass->scale = {.6f, .6f, .6f};
 
-    // auto quadMesh = std::make_shared<ppgso::Mesh_Assimp>("models/smoke_cloud/plane.obj");
-    // auto smokeCloud = std::make_unique<Emitter>(quadMesh, "models/smoke_cloud/smoke_cloud_transparent.png");
-    // smokeCloud->position = {0.0f, 0.0f, 0.0f};
-    // smokeCloud->spawnPosition = {0.0f, 0.4f, 0.0f};
-    // smokeCloud->spawnRate = 1.f;
-    // scene.objects.push_back(std::move(smokeCloud));
+    whiskeyGlass->setTransparentMeshes({"pCube1"});
+    whiskeyGlass->transparency = .5f;
+    scene.objects.push_back(whiskeyGlass); //Whiskey glass
+
+    auto quadMesh = std::make_shared<ppgso::Mesh_Assimp>("models/smoke_cloud/plane.obj");
+    auto smokeCloud = std::make_unique<Emitter>(quadMesh, "models/smoke_cloud/smoke_cloud_transparent.png");
+    smokeCloud->position = {0.0f, 0.0f, 0.0f};
+    smokeCloud->spawnPosition = {0.0f, 0.4f, 0.0f};
+    smokeCloud->spawnRate = 1.f;
+    scene.objects.push_back(std::move(smokeCloud));
   }
 
   //Create scene
@@ -88,11 +101,36 @@ private:
     scene.objects.clear();
 
     // Create a camera
-    auto camera = std::make_unique<Camera>(60.0f, 1.0f, 0.1f, 100.0f);
+    auto camera = std::make_unique<Camera>(60.0f, (float)currentWidth / (float)currentHeight, 0.1f, 100.0f);
     camera->position.y = 1.f;  //Camera position
     scene.camera = move(camera);
 
     loadObjects();
+  }
+
+  static void windowSizeCallback(GLFWwindow* window, int width, int height) {
+    SceneWindow* win = static_cast<SceneWindow*>(glfwGetWindowUserPointer(window));
+    if (win) {
+      win->handleWindowResize(width, height);
+    }
+  }
+
+  void handleWindowResize(int width, int height) {
+    currentWidth = width;
+    currentHeight = height;
+
+    // Update viewport
+    glViewport(0, 0, width, height);
+
+    // Update camera aspect ratio
+    if (scene.camera) {
+      scene.camera->projectionMatrix = glm::perspective(
+        glm::radians(60.0f),
+        (float)width / (float)height,
+        0.1f,
+        100.0f
+      );
+    }
   }
 
   static void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
@@ -135,12 +173,13 @@ private:
   }
 
 public:
-  SceneWindow() : Window{"Scene2", SIZE, SIZE} {
+  SceneWindow() : Window{"Scene2", WIDTH, HEIGHT} {
     //hideCursor();
     glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
 
     glfwSetWindowUserPointer(window, this);
     glfwSetCursorPosCallback(window, mouseCallback);
+    glfwSetWindowSizeCallback(window, windowSizeCallback);
 
     glfwGetCursorPos(window, &lastMouseX, &lastMouseY);
 
@@ -151,7 +190,11 @@ public:
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
 
+    glViewport(0, 0, WIDTH, HEIGHT);
+
     initScene();
+
+    handleWindowResize(WIDTH, HEIGHT);
 
     time = (float)glfwGetTime();
   }
@@ -201,6 +244,22 @@ public:
                   << -scene.camera->back.z << ")" << std::endl;
         std::cout << "=======================" << std::endl;
       }
+
+      if (key == GLFW_KEY_F) {
+        // Toggle fullscreen
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        if (glfwGetWindowMonitor(window) == nullptr) {
+          // Go fullscreen
+          glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+          std::cout << "Fullscreen mode" << std::endl;
+        } else {
+          // Go windowed
+          glfwSetWindowMonitor(window, nullptr, 100, 100, WIDTH, HEIGHT, 0);
+          std::cout << "Windowed mode" << std::endl;
+        }
+      }
     }
   }
 
@@ -240,6 +299,7 @@ int main() {
   std::cout << "C - Toggle free camera (mouse look)" << std::endl;
   std::cout << "R - Reset camera position" << std::endl;
   std::cout << "P - Print camera position and rotation" << std::endl;
+  std::cout << "F - Toggle fullscreen" << std::endl;
   std::cout << "=================" << std::endl;
 
   SceneWindow window;

@@ -55,9 +55,6 @@ std::unique_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& 
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     
     try {
-        // if (ext == ".bmp") {
-        //     return std::make_unique<ppgso::Texture>(loadImageFile(path));
-        // }
         if (ext == ".png") {
             return std::make_unique<ppgso::Texture>(loadImageFile(path));
         }

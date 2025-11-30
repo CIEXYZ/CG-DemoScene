@@ -36,5 +36,5 @@ void main() {
 
   // Lookup the color in Texture on coordinates given by texCoord
   // NOTE: Texture coordinate is inverted vertically for compatibility with OBJ
-  FragmentColor = vec4(texColor.rgb * ColorTint * lighting, Transparency);
+  FragmentColor = vec4(texColor.rgb * ColorTint * lighting, texColor.a * Transparency);
 }
