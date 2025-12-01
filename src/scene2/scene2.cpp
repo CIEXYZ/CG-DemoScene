@@ -9,6 +9,7 @@
 #include "Emitter.h"
 #include "scene.h"
 #include "DanceFloorObject.h"
+#include "WhiskeyGlassObject.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -79,21 +80,21 @@ private:
 
     scene.objects.push_back(building); //Main Building
 
-    auto whiskeyGlass = std::make_shared<Object>("models/whiskey_glass/scene.gltf");
+    auto whiskeyGlass = std::make_shared<WhiskeyGlassObject>("models/whiskey_glass/scene.gltf");
     whiskeyGlass->position = {-3.1f, .95f, 0.0f};
     whiskeyGlass->rotation = {0.0f, 0.0f, 0.0f};
     whiskeyGlass->scale = {.6f, .6f, .6f};
 
     whiskeyGlass->setTransparentMeshes({"pCube1"});
-    whiskeyGlass->transparency = .5f;
+    whiskeyGlass->transparency = .4f;
     scene.objects.push_back(whiskeyGlass); //Whiskey glass
 
-    auto quadMesh = std::make_shared<ppgso::Mesh_Assimp>("models/smoke_cloud/plane.obj");
-    auto smokeCloud = std::make_unique<Emitter>(quadMesh, "models/smoke_cloud/smoke_cloud_transparent.png");
-    smokeCloud->position = {0.0f, 0.0f, 0.0f};
-    smokeCloud->spawnPosition = {0.0f, 0.4f, 0.0f};
-    smokeCloud->spawnRate = 1.f;
-    scene.objects.push_back(std::move(smokeCloud));
+    // auto quadMesh = std::make_shared<ppgso::Mesh_Assimp>("models/smoke_cloud/plane.obj");
+    // auto smokeCloud = std::make_unique<Emitter>(quadMesh, "models/smoke_cloud/smoke_cloud_transparent.png");
+    // smokeCloud->position = {0.0f, 0.0f, 0.0f};
+    // smokeCloud->spawnPosition = {0.0f, 0.4f, 0.0f};
+    // smokeCloud->spawnRate = 1.f;
+    // scene.objects.push_back(std::move(smokeCloud));
   }
 
   //Create scene

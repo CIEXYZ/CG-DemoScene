@@ -182,6 +182,8 @@ add_executable(scene2
         src/scene2/Emitter.cpp
         src/scene2/DanceFloorObject.h
         src/scene2/DanceFloorObject.cpp
+        src/scene2/WhiskeyGlassObject.cpp
+        src/scene2/WhiskeyGlassObject.h
 )
 target_link_libraries(scene2 ppgso shaders)
 install (TARGETS scene2 DESTINATION .)
