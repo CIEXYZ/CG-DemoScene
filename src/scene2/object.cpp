@@ -87,8 +87,18 @@ void Object::update(Scene &scene, float dt) {
         modelMatrix = glm::scale(modelMatrix, scale);
     }
 
-    if (usesGravity && !isStatic) {
-        // velocity.y = velocity.y - 9.81f *(dt*0.01);
+    if (!isStatic) {
+        bool wasGrounded = isGrounded;
+
+        if (usesGravity && !wasGrounded) {
+            glm::vec3 gravity = glm::vec3(0.f, -9.81f, 0.f) * mass;
+            applyForces(gravity);
+        }
+        glm::vec3 dragForce = -velocity * (1.f - drag);
+        applyForces(dragForce);
+
+        acceleration = forces / mass;
+        velocity += acceleration * dt;
 
         oldPosition = position;
         position = position + (velocity) * dt;
@@ -118,7 +128,6 @@ void Object::update(Scene &scene, float dt) {
     if (hasCollision) {
         boundingBox.update(position, scale * boxSize, boxOffset);
     }
-
 }
 
 void Object::stopOnYAxis(std::shared_ptr<Object> &obj) {
@@ -195,4 +204,14 @@ bool Object::collidesWithOther(const Object &otherObject) const {
     if (hasCollision || otherObject.hasCollision) {
         return boundingBox.collidesWithOther(otherObject.boundingBox);
     }
+}
+
+void Object::applyForces(const glm::vec3 &force) {
+    if (!isStatic) {
+        forces += force;
+    }
+}
+
+void Object::clearForce() {
+    forces = glm::vec3(0.0f);
 }

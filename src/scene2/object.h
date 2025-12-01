@@ -19,15 +19,20 @@ public:
   glm::vec3 oldPosition{0.f};
 
   float transparency = 1.f;
+  float drag = 1.f;
+  float mass = 1.f;
   bool billboarding = false;
   bool hasCollision = false; //turn on for objects that need it
   bool usesGravity = false;
   bool isStatic = true;
+  bool isGrounded = false;
 
   AABB boundingBox;
 
   glm::vec3 boxSize = glm::vec3(1.f);
   glm::vec3 boxOffset = glm::vec3(0.0f);
+  glm::vec3 acceleration = glm::vec3(0.0f);
+  glm::vec3 forces = glm::vec3(0.0f);
 
   //====something========
   static std::shared_ptr<Object> coloredObject(
@@ -52,6 +57,8 @@ public:
   std::shared_ptr<ppgso::Mesh_Assimp> getMesh() const { return mesh; }
 
   bool collidesWithOther(const Object &otherObject) const;
+  void applyForces(const glm::vec3 &force);
+  void clearForce();
 
 protected:
   void generateModelMatrix();

@@ -16,7 +16,6 @@ public:
 
     void update(Scene &scene, float dt) override;
 
-    // glm::vec3 velocity;
     float life;
     float age;
     float fadeStart;
