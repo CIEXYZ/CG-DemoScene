@@ -14,9 +14,9 @@ public:
   glm::mat4 projectionMatrix;
 
   // Camera control
-  float moveSpeed = 10.0f;
+  float moveSpeed = 3.0f;
   float rotationSpeed = 0.1f;
-  float yaw = 0.0f;
+  float yaw = 90.0f;
   float pitch = 0.0f;
 
   Camera(float fow = 45.0f, float ratio = 1.0f, float near = 0.1f, float far = 10.0f);

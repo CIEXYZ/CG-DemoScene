@@ -8,12 +8,12 @@
 - [X] (2b) Objekty ako unikátne 3D polygonálne modely 
 - [ ] (2b) Unikátne mapovanie textúr pomocou UV koordinátov na 3D objekt
 - [ ] (2b) Efektívne inštancovanie 3D objektu: zobrazenie aspoň 5000 inštancií za použitia OpenGL inštancovania
-- [ ] (2b) Priesvitné objekty
+- [X] (2b) Priesvitné objekty
 - [ ] (1b) Objekt s využitím hrbolatej textúry (normal mapping)
 
 ### Scéna
 - [ ] (2b) Procedurálne generovaná scéna
-- [ ] (4b) Hierarchická reprezentácia scény
+- [X] (4b) Hierarchická reprezentácia scény
 - [ ] (2b) Využitie techniky mapovania na kocku (cube mapping)
 
 ### Animované objekty
@@ -27,7 +27,7 @@
 - [ ] (2b) Simulácia pevných telies (rigid bodies) so správný výpočtom síl, kombinácie lineárneho a uhlového pohybu, a aplikácie krútiaceho momentu
 
 ### Práca s kamerou
-- [ ] (1b) Kamera s perspektívnou projekciou, správna zmena veľkosti okna a zobrazovacieho priestoru
+- [X] (1b) Kamera s perspektívnou projekciou, správna zmena veľkosti okna a zobrazovacieho priestoru
 - [ ] (2b) Animovaná kamera pomocou kľúčových snímkov, ktoré obsahujú informáciu v danom čase kde sa kamera nachádza a kam sa pozerá, použitie inej ako lineárnej interpolácie
 
 ### Osvetlenie za pomoci viacerých svetelných zdrojov

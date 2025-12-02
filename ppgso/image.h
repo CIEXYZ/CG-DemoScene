@@ -9,7 +9,7 @@ namespace ppgso {
   class Image {
   public:
     struct Pixel {
-      uint8_t r, g, b;
+      uint8_t r, g, b, a;
     };
 
     /*!

@@ -4,6 +4,9 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <map>
+#include <vector>
+#include <string>
+#include <set>
 #include "Mesh_Assimp.h"
 
 class Scene;
@@ -14,13 +17,18 @@ public:
   glm::vec3 rotation{0,0,0};
   glm::vec3 scale{1,1,1};
   glm::mat4 modelMatrix{1};
+
   bool billboarding = false;
-  float transparency = 1.f;
+  float transparency;
 
   Object() = default;
   Object(const std::string& modelPath);
   Object(std::shared_ptr<ppgso::Mesh_Assimp> sharedMesh, const std::string& texturePath);
   virtual ~Object() = default;
+
+  // Set which mesh names should be transparent
+  void setTransparentMeshes(const std::vector<std::string>& meshNames);
+  bool isMeshTransparent(const std::string& meshName) const;
 
   virtual void update(Scene &scene, float dt);
   virtual void render(Scene &scene);
@@ -38,4 +46,5 @@ protected:
   std::map<unsigned int, std::unique_ptr<ppgso::Texture>> materialTextures;
 
   bool ownsMesh = true;
+  std::set<std::string> transparentMeshNames;
 };
