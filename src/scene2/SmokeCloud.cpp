@@ -10,21 +10,21 @@
 #include <shaders/diffuse_frag_glsl.h>
 #include <shaders/diffuse_vert_glsl.h>
 
-SmokeCloud::SmokeCloud(std::shared_ptr<ppgso::Mesh_Assimp> mesh, const std::string& texturePath) : Object(mesh, texturePath) {
-    billboarding = true;
-
-    age = 0.0f;
-    life = glm::linearRand(3.0f, 6.0f);
-    fadeStart = 0.6f;
-    initialScale = glm::linearRand(.5f, 1.0f);
-    scale = glm::vec3(initialScale);
-
-    velocity = glm::vec3(
-        glm::linearRand(-.3f, .3f), //x
-        glm::linearRand(.5f, 1.0f), //y
-        glm::linearRand(-.3f, .3f) //z
-    );
-}
+// SmokeCloud::SmokeCloud(std::shared_ptr<ppgso::Mesh_Assimp> mesh, const std::string& texturePath) : Object(mesh, texturePath) {
+//     billboarding = true;
+//
+//     age = 0.0f;
+//     life = glm::linearRand(3.0f, 6.0f);
+//     fadeStart = 0.6f;
+//     initialScale = glm::linearRand(.5f, 1.0f);
+//     scale = glm::vec3(initialScale);
+//
+//     velocity = glm::vec3(
+//         glm::linearRand(-.3f, .3f), //x
+//         glm::linearRand(.5f, 1.0f), //y
+//         glm::linearRand(-.3f, .3f) //z
+//     );
+// }
 // constructor for cashed textures
 SmokeCloud::SmokeCloud(std::shared_ptr<ppgso::Mesh_Assimp> mesh, std::shared_ptr<ppgso::Texture> sharedTexture) : Object(mesh, "") {
     billboarding = true;

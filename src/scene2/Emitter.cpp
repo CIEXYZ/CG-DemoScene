@@ -7,7 +7,7 @@
 
 Emitter::Emitter(std::shared_ptr<ppgso::Mesh_Assimp> smokeMesh, const std::string &smokeTexture)
     : Object(smokeMesh, smokeTexture){
-    this->smokeTexture = ModelLoader::loadTextureFileShared(smokeTexture);
+    this->smokeTexture = ModelLoader::loadTextureFile(smokeTexture);
     this->smokeMesh = smokeMesh;
 
     spawnRate = 2.f;
