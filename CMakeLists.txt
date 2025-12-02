@@ -96,6 +96,7 @@ set(PPGSO_SHADER_SRC
         shader/convolution_vert.glsl shader/convolution_frag.glsl
         shader/diffuse_vert.glsl shader/diffuse_frag.glsl
         shader/texture_vert.glsl shader/texture_frag.glsl
+        shader/animated_vert.glsl shader/diffuse_frag.glsl
 )
 add_resources(shaders ${PPGSO_SHADER_SRC})
 
@@ -184,6 +185,12 @@ add_executable(scene2
         src/scene2/DanceFloorObject.cpp
         src/scene2/WhiskeyGlassObject.cpp
         src/scene2/WhiskeyGlassObject.h
+        src/scene2/PersonObject.cpp
+        src/scene2/PersonObject.h
+        src/scene2/AnimationLoader.cpp
+        src/scene2/AnimationLoader.h
+        src/scene2/AnimatedMesh.cpp
+        src/scene2/AnimatedMesh.h
 )
 target_link_libraries(scene2 ppgso shaders)
 install (TARGETS scene2 DESTINATION .)

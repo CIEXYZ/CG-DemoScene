@@ -10,6 +10,7 @@
 #include "scene.h"
 #include "DanceFloorObject.h"
 #include "WhiskeyGlassObject.h"
+#include "PersonObject.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -50,10 +51,10 @@ private:
     man1->scale = {.01f, .01f, .01f};
     scene.objects.push_back(man1); //Man with different texture
 
-    auto woman = std::make_shared<Object>("models/people/female/scene.gltf");
+    auto woman = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/idle_animation.fbx");
     woman->position = {9.0f, 0.0f, 0.0f};
-    woman->rotation = {1.6, 0.0f, 0.0f};
-    woman->scale = {1.1f, 1.1f, 1.1f};
+    woman->rotation = {0.0f, 0.0f, 0.0f};
+    woman->scale = {.011f, .011f, .011f};
     scene.objects.push_back(woman); //Woman
 
     auto danceFloor = std::make_shared<DanceFloorObject>();
