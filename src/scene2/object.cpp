@@ -12,6 +12,18 @@
 #include <shaders/diffuse_vert_glsl.h>
 #include <shaders/diffuse_frag_glsl.h>
 
+//======something========
+std::shared_ptr<Object> Object::coloredObject(const glm::vec3& position, const glm::vec3& scale) {
+
+    auto obj = std::make_shared<Object>("models/smoke_cloud/plane.obj");
+    obj->position = position;
+    obj->scale = scale;
+    obj->materialTextures[0] = ModelLoader::createWhiteTexture();
+
+    return obj;
+}
+
+
 Object::Object(const std::string& modelPath) {
     shader = std::make_unique<ppgso::Shader>(diffuse_vert_glsl, diffuse_frag_glsl);
     mesh = std::make_shared<ppgso::Mesh_Assimp>(modelPath);
@@ -69,6 +81,10 @@ void Object::setShader(const std::string& vertShader, const std::string& fragSha
 void Object::update(Scene &scene, float dt) {
     modelMatrix = glm::mat4(1.0f);
 
+    if (hasCollision) {
+        boundingBox.update(position, scale * boxSize, boxOffset);
+    }
+
     if (billboarding) {
         glm::mat4 viewMatrix = scene.camera->viewMatrix;
 
@@ -90,6 +106,75 @@ void Object::update(Scene &scene, float dt) {
         modelMatrix = glm::rotate(modelMatrix, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
         modelMatrix = glm::scale(modelMatrix, scale);
     }
+
+    if (!isStatic) {
+        bool wasGrounded = isGrounded;
+
+        if (usesGravity && !wasGrounded) {
+            glm::vec3 gravity = glm::vec3(0.f, -9.81f, 0.f) * mass;
+            applyForces(gravity);
+        }
+        glm::vec3 dragForce = -velocity * (1.f - drag);
+        applyForces(dragForce);
+
+        acceleration = forces / mass;
+        velocity += acceleration * dt;
+
+        oldPosition = position;
+        position = position + (velocity) * dt;
+
+        if (hasCollision) {
+            boundingBox.update(position, scale * boxSize, boxOffset);
+        }
+
+        for (auto &obj : scene.objects) {
+            bool shouldResponse = obj.get() != this && obj->hasCollision && collidesWithOther(*obj);
+
+            if (shouldResponse) {
+                if (velocity.y < .0f) {
+                    stopOnYAxis(obj);
+                }
+                if (velocity.x != .0f) {
+                    stopOnXAxis(obj);
+                }
+                if (velocity.z != .0f) {
+                    stopOnZAxis(obj);
+                }
+                break;
+            }
+        }
+    }
+
+    if (hasCollision) {
+        boundingBox.update(position, scale * boxSize, boxOffset);
+    }
+}
+
+void Object::stopOnYAxis(std::shared_ptr<Object> &obj) {
+    velocity.y = 0.0f;
+    position.y = obj->boundingBox.max.y + (boundingBox.getSize().y * .5f);
+    boundingBox.update(position, scale * boxSize, boxOffset);
+}
+
+void Object::stopOnXAxis(std::shared_ptr<Object> &obj) {
+    if (oldPosition.x < obj->position.x) {
+        position.x = obj->boundingBox.min.x - (boundingBox.getSize().x * .5f);
+    }else {
+        position.x = obj->boundingBox.max.x + (boundingBox.getSize().x * .5f);
+    }
+
+    velocity.x = 0.0f;
+    boundingBox.update(position, scale * boxSize, boxOffset);
+}
+
+void Object::stopOnZAxis(std::shared_ptr<Object> &obj) {
+    if (oldPosition.z < obj->position.z) {
+        position.z = obj->boundingBox.min.z - (boundingBox.getSize().z * .5f);
+    }else {
+        position.z = obj->boundingBox.max.z + (boundingBox.getSize().z * .5f);
+    }
+    velocity.z = .0f;
+    boundingBox.update(position, scale * boxSize, boxOffset);
 }
 
 // Help find aiMesh by name and calculate its center
@@ -243,4 +328,20 @@ void Object::generateModelMatrix() {
             glm::translate(glm::mat4(1.0f), position)
             * glm::orientate4(rotation)
             * glm::scale(glm::mat4(1.0f), scale);
+}
+
+bool Object::collidesWithOther(const Object &otherObject) const {
+    if (hasCollision || otherObject.hasCollision) {
+        return boundingBox.collidesWithOther(otherObject.boundingBox);
+    }
+}
+
+void Object::applyForces(const glm::vec3 &force) {
+    if (!isStatic) {
+        forces += force;
+    }
+}
+
+void Object::clearForce() {
+    forces = glm::vec3(0.0f);
 }

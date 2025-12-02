@@ -2,7 +2,7 @@
 
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec2 TexCoord;
-layout(location = 2) in vec3 Normal;
+layout(location = 2) in vec4 Normal;
 layout(location = 3) in ivec4 BoneIDs;
 layout(location = 4) in vec4 Weights;
 
@@ -19,13 +19,13 @@ uniform bool hasAnimation;
 
 out vec2 texCoord;
 
-out vec3 normal;
+out vec4 normal;
 
 out vec3 fragPosition;
 
 void main() {
     vec4 totalPosition = vec4(0.0f);
-    vec3 totalNormal = vec3(0.0f);
+    vec4 totalNormal = vec4(0.0f);
 
     if (hasAnimation) {
         for(int i = 0 ; i < MAX_BONE_INFLUENCE ; i++) {
@@ -37,7 +37,7 @@ void main() {
             }
             vec4 localPosition = finalBonesMatrices[BoneIDs[i]] * vec4(Position, 1.0f);
             totalPosition += localPosition * Weights[i];
-            vec3 localNormal = mat3(finalBonesMatrices[BoneIDs[i]]) * Normal;
+            vec4 localNormal = mat4(finalBonesMatrices[BoneIDs[i]]) * Normal;
             totalNormal += localNormal * Weights[i];
         }
     } else {
@@ -47,7 +47,7 @@ void main() {
 
     mat4 modelView = ViewMatrix * ModelMatrix;
     fragPosition = vec3(ModelMatrix * totalPosition);
-    normal = mat3(transpose(inverse(ModelMatrix))) * totalNormal;
+    normal = mat4(transpose(inverse(ModelMatrix))) * totalNormal;
     texCoord = TexCoord;
 
     gl_Position = ProjectionMatrix * modelView * totalPosition;

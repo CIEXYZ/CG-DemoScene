@@ -6,6 +6,8 @@
 #include <stb_image.h>
 #include <assimp/scene.h>
 
+std::map<std::string, std::shared_ptr<ppgso::Texture>> ModelLoader::textureCache;
+
 std::string getFileExtension(const std::string& path) {
     auto pos = path.rfind('.');
     return (pos == std::string::npos) ? "" : path.substr(pos);
@@ -50,20 +52,62 @@ ppgso::Image ModelLoader::loadImageFile(const std::string& filename) {
     return image;
 }
 
-std::unique_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& path) {
+std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& path) {
     std::string ext = getFileExtension(path);
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    
+
+    auto it = textureCache.find(path);
+
+    if (it != textureCache.end()) {
+        std::cout << "using texture cache" << std::endl;
+        return it->second;
+    }
+
+    std::cout << "loading texture from disk" << std::endl;
+
     try {
+        std::shared_ptr<ppgso::Texture> texture;
+
         if (ext == ".png") {
-            return std::make_unique<ppgso::Texture>(loadImageFile(path));
+            texture = std::make_unique<ppgso::Texture>(loadImageFile(path));
         }
+
+        if (texture) {
+            textureCache[path] = texture;
+            std::cout << "✓ Cached texture: " << path << std::endl;
+        }
+
+        return texture;
 
     } catch (const std::exception& e) {
         std::cerr << "Failed to load texture " << path << ": " << e.what() << std::endl;
         return nullptr;
     }
 }
+
+// std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFileShared(const std::string& path) {
+//
+//
+//     std::string ext = getFileExtension(path);
+//     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+//
+//     std::shared_ptr<ppgso::Texture> texture;
+//
+//     try {
+//         if (ext == ".bmp") {
+//             texture = std::make_shared<ppgso::Texture>(ppgso::image::loadBMP(path));
+//         } else if (ext == ".png") {
+//             texture = std::make_shared<>(path);
+//         } else {
+//             texture = std::make_shared<ppgso::Texture>(loadImageFile(path));
+//         }
+//         return texture;
+//
+//     } catch (const std::exception& e) {
+//         std::cerr << "Failed to load texture " << path << ": " << e.what() << std::endl;
+//         return nullptr;
+//     }
+// }
 
 //Placeholder texture
 std::unique_ptr<ppgso::Texture> ModelLoader::createWhiteTexture() {
@@ -83,8 +127,8 @@ std::string ModelLoader::findTextureFile(const std::string& texturePath, const s
     return textureFullPath;
 }
 
-std::map<unsigned int, std::unique_ptr<ppgso::Texture>> ModelLoader::loadTextures(const ppgso::Mesh_Assimp* mesh) {
-    std::map<unsigned int, std::unique_ptr<ppgso::Texture>> materialTextures;
+std::map<unsigned int, std::shared_ptr<ppgso::Texture>> ModelLoader::loadTextures(const ppgso::Mesh_Assimp* mesh) {
+    std::map<unsigned int, std::shared_ptr<ppgso::Texture>> materialTextures;
 
     const aiScene* scene = mesh->getScene();
     if (!scene) {

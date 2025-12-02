@@ -2,12 +2,12 @@
 // Created by majer on 11/22/2025.
 //
 #include "Emitter.h"
-
+#include "ModelLoader.h"
 #include "scene.h"
 
 Emitter::Emitter(std::shared_ptr<ppgso::Mesh_Assimp> smokeMesh, const std::string &smokeTexture)
     : Object(smokeMesh, smokeTexture){
-    this->smokeTexture = smokeTexture;
+    this->smokeTexture = ModelLoader::loadTextureFile(smokeTexture);
     this->smokeMesh = smokeMesh;
 
     spawnRate = 2.f;
@@ -24,7 +24,7 @@ void Emitter::update(Scene &scene, float dt) {
         float spawnInterval = 1.f / spawnRate;
 
         if (lastSpawnTime > spawnInterval) {
-            auto cloud = std::make_unique<SmokeCloud>(this->smokeMesh, this->smokeTexture);
+            auto cloud = std::make_unique<SmokeCloud>(smokeMesh, smokeTexture);
             cloud->position = position + spawnPosition;
             clouds.push_back(std::move(cloud));
             lastSpawnTime = 0.f;

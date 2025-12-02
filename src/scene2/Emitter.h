@@ -23,9 +23,10 @@ public:
     float spawnRate;
     glm::vec3 spawnPosition;
     bool isActive;
+    float lastSpawnTime;
+
 
     std::shared_ptr<ppgso::Mesh_Assimp> smokeMesh;
-    std::string smokeTexture;
+    std::shared_ptr<ppgso::Texture> smokeTexture;
     std::vector<std::unique_ptr<SmokeCloud>> clouds;
-    float lastSpawnTime;
 };

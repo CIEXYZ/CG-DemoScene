@@ -8,6 +8,7 @@
 #include <string>
 #include <set>
 #include "Mesh_Assimp.h"
+#include "AABB.h"
 
 class Scene;
 
@@ -17,9 +18,30 @@ public:
   glm::vec3 rotation{0,0,0};
   glm::vec3 scale{1,1,1};
   glm::mat4 modelMatrix{1};
+  glm::vec3 velocity{0.f};
+  glm::vec3 oldPosition{0.f};
 
+  float transparency = 1.f;
+  float drag = 1.f;
+  float mass = 1.f;
   bool billboarding = false;
-  float transparency;
+  bool hasCollision = false; //turn on for objects that need it
+  bool usesGravity = false;
+  bool isStatic = true;
+  bool isGrounded = false;
+
+  AABB boundingBox;
+
+  glm::vec3 boxSize = glm::vec3(1.f);
+  glm::vec3 boxOffset = glm::vec3(0.0f);
+  glm::vec3 acceleration = glm::vec3(0.0f);
+  glm::vec3 forces = glm::vec3(0.0f);
+
+  //====something========
+  static std::shared_ptr<Object> coloredObject(
+  const glm::vec3 &position,
+  const glm::vec3 &scale
+  );
 
   Object() = default;
   Object(const std::string& modelPath);
@@ -31,6 +53,9 @@ public:
   bool isMeshTransparent(const std::string& meshName) const;
 
   virtual void update(Scene &scene, float dt);
+  virtual void stopOnYAxis(std::shared_ptr<Object> &obj);
+  virtual void stopOnXAxis(std::shared_ptr<Object> &obj);
+  virtual void stopOnZAxis(std::shared_ptr<Object> &obj);
   virtual void render(Scene &scene);
 
   void setMesh(const std::string& meshPath);
@@ -38,12 +63,16 @@ public:
 
   std::shared_ptr<ppgso::Mesh_Assimp> getMesh() const { return mesh; }
 
+  bool collidesWithOther(const Object &otherObject) const;
+  void applyForces(const glm::vec3 &force);
+  void clearForce();
+
 protected:
   void generateModelMatrix();
 
   std::shared_ptr<ppgso::Mesh_Assimp> mesh;
   std::unique_ptr<ppgso::Shader> shader;
-  std::map<unsigned int, std::unique_ptr<ppgso::Texture>> materialTextures;
+  std::map<unsigned int, std::shared_ptr<ppgso::Texture>> materialTextures;
 
   bool ownsMesh = true;
   std::set<std::string> transparentMeshNames;
