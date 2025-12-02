@@ -13,7 +13,7 @@
 class SmokeCloud : public Object {
 public:
     SmokeCloud(std::shared_ptr<ppgso::Mesh_Assimp> mesh, const std::string& texturePath);
-
+    SmokeCloud(std::shared_ptr<ppgso::Mesh_Assimp> mesh, std::shared_ptr<ppgso::Texture> sharedTexture);
     void update(Scene &scene, float dt) override;
 
     float life;

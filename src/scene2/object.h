@@ -65,7 +65,7 @@ protected:
 
   std::shared_ptr<ppgso::Mesh_Assimp> mesh;
   std::unique_ptr<ppgso::Shader> shader;
-  std::map<unsigned int, std::unique_ptr<ppgso::Texture>> materialTextures;
+  std::map<unsigned int, std::shared_ptr<ppgso::Texture>> materialTextures;
 
   bool ownsMesh = true;
 };
