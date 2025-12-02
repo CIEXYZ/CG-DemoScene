@@ -4,6 +4,9 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <map>
+#include <vector>
+#include <string>
+#include <set>
 #include "Mesh_Assimp.h"
 #include "AABB.h"
 
@@ -45,6 +48,10 @@ public:
   Object(std::shared_ptr<ppgso::Mesh_Assimp> sharedMesh, const std::string& texturePath);
   virtual ~Object() = default;
 
+  // Set which mesh names should be transparent
+  void setTransparentMeshes(const std::vector<std::string>& meshNames);
+  bool isMeshTransparent(const std::string& meshName) const;
+
   virtual void update(Scene &scene, float dt);
   virtual void stopOnYAxis(std::shared_ptr<Object> &obj);
   virtual void stopOnXAxis(std::shared_ptr<Object> &obj);
@@ -68,4 +75,5 @@ protected:
   std::map<unsigned int, std::shared_ptr<ppgso::Texture>> materialTextures;
 
   bool ownsMesh = true;
+  std::set<std::string> transparentMeshNames;
 };

@@ -22,7 +22,7 @@ void ppgso::Texture::initGL() {
   glBindTexture(GL_TEXTURE_2D, texture);
 
   // Reserve texture storage
-  glTexStorage2D(GL_TEXTURE_2D, 3, GL_RGB8, image.width, image.height);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
   // Set up mipmapping
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -37,7 +37,7 @@ void ppgso::Texture::initGL() {
 void ppgso::Texture::update() {
   bind();
   // Upload texture to GPU
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image.width, image.height, GL_RGB, GL_UNSIGNED_BYTE, image.getFramebuffer().data());
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.getFramebuffer().data());
 
   // Re-generate mipmaps
   glGenerateMipmap(GL_TEXTURE_2D);

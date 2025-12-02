@@ -1,0 +1,126 @@
+#include "PersonObject.h"
+#include "ModelLoader.h"
+#include <iostream>
+
+// Use the same diffuse fragment shader
+#include <shaders/animated_vert_glsl.h> //TODO: merge 2 shaders or make interpolation in diffuse shader
+#include <shaders/diffuse_frag_glsl.h>
+
+PersonObject::PersonObject(const std::string& modelPath) {
+    // Create animated mesh
+    animMesh = std::make_unique<AnimatedMesh>(modelPath);
+
+    const aiScene* scene = animMesh->getScene();
+    if (scene) {
+        mesh = std::make_shared<ppgso::Mesh_Assimp>(modelPath);
+        materialTextures = ModelLoader::loadTextures(mesh.get());
+    }
+
+    // Set animated shader
+    shader = std::make_unique<ppgso::Shader>(animated_vert_glsl, diffuse_frag_glsl);
+    hasAnimation = false;
+
+    std::cout << "PersonObject created (no animation)" << std::endl;
+}
+
+PersonObject::PersonObject(const std::string& modelPath, const std::string& animationPath) {
+    // Create animated mesh
+    animMesh = std::make_unique<AnimatedMesh>(modelPath);
+
+    // Load textures
+    const aiScene* scene = animMesh->getScene();
+    if (scene) {
+        mesh = std::make_shared<ppgso::Mesh_Assimp>(modelPath);
+        materialTextures = ModelLoader::loadTextures(mesh.get());
+    }
+
+    // Set animated shader
+    shader = std::make_unique<ppgso::Shader>(animated_vert_glsl, diffuse_frag_glsl);
+
+    // Load animation
+    loadAnimation(animationPath);
+
+    std::cout << "PersonObject created with animation" << std::endl;
+}
+
+void PersonObject::loadAnimation(const std::string& animationPath) {
+    if (!animMesh) {
+        std::cerr << "Cannot load animation: animated mesh not created!" << std::endl;
+        return;
+    }
+
+    const aiScene* scene = animMesh->getScene();
+    if (!scene) {
+        std::cerr << "Cannot load animation: scene not available!" << std::endl;
+        return;
+    }
+
+    auto animation = std::make_unique<Animation>(animationPath, scene);
+    animations.push_back(std::move(animation));
+
+    if (!animator && !animations.empty()) {
+        animator = std::make_unique<Animator>(animations[0].get());
+        hasAnimation = true;
+        std::cout << "Animation loaded successfully" << std::endl;
+    }
+}
+
+void PersonObject::playAnimation(int animationIndex) {
+    if (animationIndex >= 0 && animationIndex < animations.size() && animator) {
+        animator->playAnimation(animations[animationIndex].get());
+        std::cout << "Playing animation " << animationIndex << std::endl;
+    }
+}
+
+void PersonObject::update(Scene &scene, float dt) {
+    // Update animation
+    if (hasAnimation && animator) {
+        animator->updateAnimation(dt);
+    }
+
+    // Update model matrix
+    modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = glm::rotate(modelMatrix, rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    modelMatrix = glm::scale(modelMatrix, scale);
+}
+
+void PersonObject::render(Scene &scene) {
+    if (!animMesh) return;
+
+    shader->use();
+
+    shader->setUniform("ProjectionMatrix", scene.camera->projectionMatrix);
+    shader->setUniform("ViewMatrix", scene.camera->viewMatrix);
+    shader->setUniform("ModelMatrix", modelMatrix);
+
+    //TODO: add light
+
+    if (hasAnimation && animator) {
+        shader->setUniform("hasAnimation", true);
+        auto matrices = animator->getFinalBoneMatrices();
+
+        for (size_t i = 0; i < matrices.size(); ++i) {
+            std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
+            shader->setUniform(uniformName, matrices[i]);
+        }
+    } else {
+        shader->setUniform("hasAnimation", false);
+    }
+
+    size_t meshCount = animMesh->getMeshCount();
+    shader->setUniform("DisableLighting", false);
+    shader->setUniform("Transparency", 1.0f);
+
+    for (size_t i = 0; i < meshCount; ++i) {
+        unsigned int matIndex = animMesh->getMaterialIndex(i);
+        auto it = materialTextures.find(matIndex);
+        if (it != materialTextures.end()) {
+            shader->setUniform("Texture", *(it->second));
+        }
+
+        animMesh->renderSingleMesh(i);
+    }
+}

@@ -33,7 +33,7 @@ ppgso::Image ModelLoader::loadImageFile(const std::string& filename) {
 
     // Load image using stb_image
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 3);
+    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 4);
 
     if (!data) throw std::runtime_error("Failed to load image: " + filename);
 
@@ -42,36 +42,20 @@ ppgso::Image ModelLoader::loadImageFile(const std::string& filename) {
     // Copy pixel data
     auto& framebuffer = image.getFramebuffer();
     for (int i = 0; i < width * height; i++) {
-        framebuffer[i].r = data[i * 3 + 0];
-        framebuffer[i].g = data[i * 3 + 1];
-        framebuffer[i].b = data[i * 3 + 2];
+        framebuffer[i].r = data[i * 4 + 0];
+        framebuffer[i].g = data[i * 4 + 1];
+        framebuffer[i].b = data[i * 4 + 2];
+        framebuffer[i].a = data[i * 4 + 3];
     }
 
     stbi_image_free(data);
     return image;
 }
 
-std::unique_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& path) {
+std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& path) {
     std::string ext = getFileExtension(path);
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    
-    try {
-        if (ext == ".bmp") {
-            return std::make_unique<ppgso::Texture>(ppgso::image::loadBMP(path));
-        }
-        if (ext == ".png") {
-           return std::make_unique<TransparentTexture>(path);
-        }
-        else {
-            return std::make_unique<ppgso::Texture>(loadImageFile(path));
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Failed to load texture " << path << ": " << e.what() << std::endl;
-        return nullptr;
-    }
-}
 
-std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFileShared(const std::string& path) {
     auto it = textureCache.find(path);
 
     if (it != textureCache.end()) {
@@ -79,23 +63,15 @@ std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFileShared(const std::st
         return it->second;
     }
 
-    std::cout << "loading texture" << std::endl;
-
-    std::string ext = getFileExtension(path);
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-
-    std::shared_ptr<ppgso::Texture> texture;
+    std::cout << "loading texture from disk" << std::endl;
 
     try {
-        if (ext == ".bmp") {
-            texture = std::make_shared<ppgso::Texture>(ppgso::image::loadBMP(path));
-        } else if (ext == ".png") {
-            texture = std::make_shared<TransparentTexture>(path);
-        } else {
-            texture = std::make_shared<ppgso::Texture>(loadImageFile(path));
+        std::shared_ptr<ppgso::Texture> texture;
+
+        if (ext == ".png") {
+            texture = std::make_unique<ppgso::Texture>(loadImageFile(path));
         }
 
-        // ✅ Store in cache
         if (texture) {
             textureCache[path] = texture;
             std::cout << "✓ Cached texture: " << path << std::endl;
@@ -107,12 +83,38 @@ std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFileShared(const std::st
         std::cerr << "Failed to load texture " << path << ": " << e.what() << std::endl;
         return nullptr;
     }
-
 }
+
+// std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFileShared(const std::string& path) {
+//
+//
+//     std::string ext = getFileExtension(path);
+//     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+//
+//     std::shared_ptr<ppgso::Texture> texture;
+//
+//     try {
+//         if (ext == ".bmp") {
+//             texture = std::make_shared<ppgso::Texture>(ppgso::image::loadBMP(path));
+//         } else if (ext == ".png") {
+//             texture = std::make_shared<>(path);
+//         } else {
+//             texture = std::make_shared<ppgso::Texture>(loadImageFile(path));
+//         }
+//         return texture;
+//
+//     } catch (const std::exception& e) {
+//         std::cerr << "Failed to load texture " << path << ": " << e.what() << std::endl;
+//         return nullptr;
+//     }
+// }
 
 //Placeholder texture
 std::unique_ptr<ppgso::Texture> ModelLoader::createWhiteTexture() {
-    return std::make_unique<ppgso::Texture>(ppgso::image::loadBMP("asteroid.bmp")); //TODO: Replace asteroid texture with something else
+    // Create a texture as placeholder
+    ppgso::Image image(1, 1);
+    image.setPixel(0, 0, {255, 255, 255});
+    return std::make_unique<ppgso::Texture>(std::move(image));
 }
 
 std::string ModelLoader::findTextureFile(const std::string& texturePath, const std::string& baseDir) {
@@ -125,8 +127,8 @@ std::string ModelLoader::findTextureFile(const std::string& texturePath, const s
     return textureFullPath;
 }
 
-std::map<unsigned int, std::unique_ptr<ppgso::Texture>> ModelLoader::loadTextures(const ppgso::Mesh_Assimp* mesh) {
-    std::map<unsigned int, std::unique_ptr<ppgso::Texture>> materialTextures;
+std::map<unsigned int, std::shared_ptr<ppgso::Texture>> ModelLoader::loadTextures(const ppgso::Mesh_Assimp* mesh) {
+    std::map<unsigned int, std::shared_ptr<ppgso::Texture>> materialTextures;
 
     const aiScene* scene = mesh->getScene();
     if (!scene) {
@@ -185,43 +187,4 @@ std::map<unsigned int, std::unique_ptr<ppgso::Texture>> ModelLoader::loadTexture
     std::cout << "\nTotal textures loaded: " << materialTextures.size() << std::endl;
 
     return materialTextures;
-}
-
-
-TransparentTexture::TransparentTexture(const std::string& path) : ppgso::Texture(1, 1) {
-    load(path);
-}
-
-void TransparentTexture::load(const std::string& path) {
-    int width, height, channels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 4);
-
-    if (!data) {
-        std::cerr << "Failed to load transparent PNG: " << path << std::endl;
-        return;
-    }
-
-    // Get the current texture ID
-    GLuint oldTexture = getTexture();
-    glDeleteTextures(1, &oldTexture);
-
-    // Create new RGBA texture
-    GLuint newTexture;
-    glGenTextures(1, &newTexture);
-    glBindTexture(GL_TEXTURE_2D, newTexture);
-
-    // Upload as RGBA8
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-    stbi_image_free(data);
-
-    // Replace internal texture ID (access protected member)
-    texture = newTexture;
 }

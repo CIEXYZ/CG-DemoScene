@@ -25,7 +25,7 @@ SmokeCloud::SmokeCloud(std::shared_ptr<ppgso::Mesh_Assimp> mesh, const std::stri
         glm::linearRand(-.3f, .3f) //z
     );
 }
-
+// constructor for cashed textures
 SmokeCloud::SmokeCloud(std::shared_ptr<ppgso::Mesh_Assimp> mesh, std::shared_ptr<ppgso::Texture> sharedTexture) : Object(mesh, "") {
     billboarding = true;
 
