@@ -21,7 +21,7 @@ void Emitter::update(Scene &scene, float dt) {
     if (isActive) {
         lastSpawnTime += dt;
 
-        float spawnInterval = 1.f / spawnRate;
+        float spawnInterval = .1f / spawnRate;
 
         if (lastSpawnTime > spawnInterval) {
             auto cloud = std::make_unique<SmokeCloud>(smokeMesh, smokeTexture);

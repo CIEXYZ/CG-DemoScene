@@ -93,9 +93,16 @@ private:
     auto quadMesh = std::make_shared<ppgso::Mesh_Assimp>("models/smoke_cloud/plane.obj");
     auto smokeCloud = std::make_shared<Emitter>(quadMesh, "models/smoke_cloud/smoke_cloud_transparent.png");
     smokeCloud->position = {0.0f, 0.0f, 0.0f};
-    smokeCloud->spawnPosition = {0.0f, 0.4f, 0.0f};
+    smokeCloud->spawnPosition = {0.0f, 0.2f, 0.0f};
     smokeCloud->spawnRate = 1.f;
     scene.objects.push_back(std::move(smokeCloud));
+
+    auto quadMesh2 = std::make_shared<ppgso::Mesh_Assimp>("models/smoke_cloud/plane.obj");
+    auto smokeCloud2 = std::make_shared<Emitter>(quadMesh2, "models/smoke_cloud/smoke_cloud_transparent.png");
+    smokeCloud2->position = {0.0f, 0.0f, 0.0f};
+    smokeCloud2->spawnPosition = {0.f, 0.2f, 2.0f};
+    smokeCloud2->spawnRate = 1.f;
+    scene.objects.push_back(std::move(smokeCloud2));
   }
 
   //Create scene

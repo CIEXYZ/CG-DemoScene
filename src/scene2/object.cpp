@@ -12,17 +12,6 @@
 #include <shaders/diffuse_vert_glsl.h>
 #include <shaders/diffuse_frag_glsl.h>
 
-//======something========
-std::shared_ptr<Object> Object::coloredObject(const glm::vec3& position, const glm::vec3& scale) {
-
-    auto obj = std::make_shared<Object>("models/smoke_cloud/plane.obj");
-    obj->position = position;
-    obj->scale = scale;
-    obj->materialTextures[0] = ModelLoader::createWhiteTexture();
-
-    return obj;
-}
-
 
 Object::Object(const std::string& modelPath) {
     shader = std::make_unique<ppgso::Shader>(diffuse_vert_glsl, diffuse_frag_glsl);
@@ -122,6 +111,19 @@ void Object::update(Scene &scene, float dt) {
 
         oldPosition = position;
         position = position + (velocity) * dt;
+
+        clearForce();
+
+        glm::vec3 angularDrag = -angularVelocity * (1.0f - drag);
+        applyTorque(angularDrag);
+
+        glm::vec3 angularAcceleration = torque / momentOfInertia;
+
+        angularVelocity += angularAcceleration * dt;
+
+        rotation += angularVelocity * dt;
+
+        clearTorque();  // Clear torque for next frame
 
         if (hasCollision) {
             boundingBox.update(position, scale * boxSize, boxOffset);
@@ -302,6 +304,7 @@ void Object::render(Scene &scene) {
 
     // Set transparent state
     shader->setUniform("Transparency", transparency);
+    shader->setUniform("DisableLighting", true);
     glDepthMask(GL_FALSE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
