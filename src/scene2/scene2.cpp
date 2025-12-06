@@ -14,6 +14,7 @@
 #include "DustEmitter.h"
 #include "WhiskeyGlassObject.h"
 #include "PersonObject.h"
+#include "Timeline.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -40,30 +41,78 @@ private:
   int currentWidth = WIDTH;
   int currentHeight = HEIGHT;
 
-
   //Loading all models
   void loadObjects() {
+    //People
     auto man = std::make_shared<Object>("models/people/male/scene.gltf");
-    man->position = {0.0f, 0.0f, .0f};
+    man->name = "main";
+    man->position = {7.0f, 0.0f, .0f};
     man->rotation = {1.55f, 0.0f, 0.0f};
-    man->scale = {.01f, .01f, .01f};
+    man->scale = {.008f, .008f, .008f};
     man->hasCollision = true;
     man->boxSize = glm::vec3(74.27f, 190.95f, 32.02f);
     scene.objects.push_back(man); //Man with default texture
 
     auto man1 = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
+    man1->name = "man1";
     man1->position = {8.0f, 0.0f, .0f};
     man1->rotation = {1.55f, 0.0f, 0.0f};
-    man->boxSize = glm::vec3(37.47f, 380.95f, 16.01f); //74.47, 190.95f 32.02
-    man1->scale = {.01f, .01f, .01f};
+    man->boxSize = glm::vec3(37.47f, 380.95f, 16.01f);
+    man1->scale = {.008f, .008f, .008f};
     scene.objects.push_back(man1); //Man with different texture
 
-    auto woman = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/idle_animation.fbx");
-    woman->position = {1.0f, 0.0f, 0.0f};
+    auto man2 = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
+    man2->name = "man2";
+    man2->position = {9.0f, 0.0f, .0f};
+    man2->rotation = {1.55f, 0.0f, 0.0f};
+    man2->scale = {.008f, .008f, .008f};
+    scene.objects.push_back(man2); //Man with different texture
+
+    auto woman = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/sit_animation.fbx");
+    woman->loadAnimation("models/people/female/animations/sit_animation.fbx");
+    woman->name = "woman";
+    woman->position = {3.0f, 0.0f, 0.0f};
     woman->rotation = {0.0f, 0.0f, 0.0f};
-    woman->scale = {.011f, .011f, .011f};
+    woman->scale = {.009f, .009f, .009f};
     scene.objects.push_back(woman); //Woman
 
+    auto madMan = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
+    madMan->name = "madMan";
+    madMan->position = {11.0f, 0.0f, .0f};
+    madMan->rotation = {1.55f, 0.0f, 0.0f};
+    madMan->scale = {.008f, .008f, .008f};
+    scene.objects.push_back(madMan); //Man with different texture
+
+    auto barman = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
+    barman->name = "barman";
+    barman->position = {-4.0f, 0.0f, 0.0f};
+    barman->rotation = {1.55f, 0.0f, 4.8f};
+    barman->scale = {.008f, .008f, .008f};
+    scene.objects.push_back(barman); //Man with different texture
+
+    auto secutiry = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
+    secutiry->name = "security";
+    secutiry->position = {8.0f, 0.0f, -3.0f};
+    secutiry->rotation = {1.55f, 0.0f, 0.0f};
+    secutiry->scale = {.008f, .008f, .008f};
+    scene.objects.push_back(secutiry); //Man with different texture
+
+    auto manNpc = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
+    manNpc->name = "manNpc";
+    manNpc->position = {9.0f, 0.0f, -3.0f};
+    manNpc->rotation = {1.55f, 0.0f, 0.0f};
+    manNpc->scale = {.008f, .008f, .008f};
+    scene.objects.push_back(manNpc); //Man with different texture
+
+    auto womanNpc = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/idle_animation.fbx");
+    womanNpc->loadAnimation("models/people/female/animations/sit_animation.fbx");
+    womanNpc->name = "womanNpc";
+    womanNpc->position = {10.0f, 0.0f, -3.0f};
+    womanNpc->rotation = {0.0f, 0.0f, 0.0f};
+    womanNpc->scale = {.009f, .009f, .009f};
+    scene.objects.push_back(womanNpc); //Woman
+
+    //Other objects
     auto danceFloor = std::make_shared<DanceFloorObject>();
     danceFloor->position = {0.0f, -0.05f, 0.0f};
     danceFloor->rotation = {0.0f, 0.0f, 0.0f};
@@ -78,7 +127,7 @@ private:
 
     scene.building = std::make_shared<Object>("models/building/scene.gltf");
     scene.building->useNormalMapping = false;
-    danceFloor->setNormalMap(0, "models/building/textures/M_Floor_normal.png");
+    scene.building->setNormalMap(0, "models/building/textures/M_Floor_normal.png");
     scene.building->position = {0.0f, 0.0f, 0.0f};
     scene.building->rotation = {0.0f, 0.0f, 0.0f};
     scene.building->scale = {1.0f, 1.0f, 1.0f};
@@ -394,6 +443,11 @@ private:
     scene.camera = move(camera);
 
     loadObjects();
+    setupTimeline();
+
+    // Start with timeline disabled by default
+    scene.useTimeline = false;
+    scene.allowManualCamera = true;
 
     scene.setupLighting();
   }
@@ -432,7 +486,8 @@ private:
 
   void handleMouseMove(double xpos, double ypos) {
     // Only handle mouse movement if free camera is enabled
-    if (!freeCamera) return;
+    if (!freeCamera || scene.useTimeline) return;
+    if (scene.useTimeline && scene.timeline && !scene.timeline->isPaused()) return;
 
     if (firstMouse) {
       lastMouseX = xpos;
@@ -460,6 +515,149 @@ private:
       scene.camera->pitch = -89.0f;
 
     scene.camera->updateRotation();
+  }
+
+  //Timeline story
+  void setupTimeline() {
+    scene.timeline = std::make_unique<Timeline>();
+
+    //Camera timeline
+    scene.timeline->addEvent(new CameraMovementEvent(
+      0.0f,
+      glm::vec3(0.0f, 1.2f, 6.0f),  // Position
+      glm::vec3(0.0f, 1.2f, 6.0f),  // Catmull-Rom point
+      glm::vec3(0.0f, 1.2f, 6.0f), // Catmull-Rom point
+      glm::vec3(-90.0f, -5.0f, 0.0f), // Rotation (yaw, pitch, roll)
+      0.0f,
+      "Init scene;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      0.1f,
+      glm::vec3(0.0f, 1.2f, 5.5f),
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(0.0f, 1.2f, 5.5f),
+      glm::vec3(-90.0f, -5.0f, 0.0f),
+      3.0f,
+      "Doors opening, light fades;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      3.5f,
+      glm::vec3(0.0f, 1.2f, 5.5f),
+      glm::vec3(0.0f, 1.2f, 5.5f),
+      glm::vec3(0.0f, 1.2f, 5.5f),
+      glm::vec3(-110.0f, -5.0f, 0.0f),
+      1.5f,
+      "Looking left;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      5.8f,
+      glm::vec3(0.0f, 1.2f, 5.5f),
+      glm::vec3(0.0f, 1.2f, 5.5f),
+      glm::vec3(0.0f, 1.2f, 5.5f),
+      glm::vec3(-70.0f, -5.0f, 0.0f),
+      2.0f,
+      "Looking right;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      8.0f,
+      glm::vec3(2.3f, 1.2f, 2.5f),
+      glm::vec3(1.0f, 1.2f, 5.5f),
+      glm::vec3(2.0f, 1.2f, 5.5f),
+      glm::vec3(-90.0f, -5.0f, 0.0f),
+      6.0f,
+      "Move right;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      13.8f,
+      glm::vec3(1.5f, 1.2f, -0.5f),
+      glm::vec3(2.3f, 1.2f, 1.5f),
+      glm::vec3(1.8f, 1.2f, 0.5f),
+      glm::vec3(-10.0f, -15.0f, 0.0f),
+      4.0f,
+      "Move forward, turn right;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      23.0f,
+      glm::vec3(3.5f, 1.2f, -0.5f),
+      glm::vec3(1.5f, 1.2f, -0.5f),
+      glm::vec3(3.5f, 1.2f, -0.5f),
+      glm::vec3(-180.0f, -5.0f, 0.0f),
+      4.0f,
+      "Turn around;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      27.0f,
+      glm::vec3(-2.4f, 1.2f, -0.0f),
+      glm::vec3(3.5f, 1.2f, -0.5f),
+      glm::vec3(-2.4f, 1.2f, -0.1f),
+      glm::vec3(-180.0f, -5.0f, 0.0f),
+      10.0f,
+      "Move forward;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      38.0f,
+      glm::vec3(-2.8f, 1.f, -0.f),
+      glm::vec3(-2.8f, 1.f, -0.f),
+      glm::vec3(-2.8f, 1.f, -0.f),
+      glm::vec3(-180.0f, -5.0f, 0.0f),
+      0.0f,
+      "Focus on glass;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      41.0f,
+      glm::vec3(-2.98f, 0.98f, -0.18f),
+      glm::vec3(-2.98f, 0.98f, -0.18f),
+      glm::vec3(-2.98f, 0.98f, -0.18f),
+      glm::vec3(-240.0f, -0.0f, 0.0f),
+      0.0f,
+      "Side perspective on glass;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      43.0f,
+      glm::vec3(-3.2f, 1.3f, -0.8f),
+      glm::vec3(-3.2f, 1.3f, -0.8f),
+      glm::vec3(-3.2f, 1.3f, -0.8f),
+      glm::vec3(60.0f, -20.0f, 0.0f),
+      0.0f,
+      "Perspective on main character;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+        45.0f,
+      glm::vec3(0.0f, 1.1f, 2.0f),
+      glm::vec3(0.0f, 1.1f, 2.0f),
+      glm::vec3(0.0f, 1.1f, 2.0f),
+      glm::vec3(-90.0f, -5.0f, 0.0f),
+      0.0f,
+      "Perspective on dancefloor;"
+    ));
+
+    //Woman timeline
+    scene.timeline->addEvent(new ObjectAnimationEvent(
+      0.0f,
+      "woman",
+      1,
+      "Woman; sit_animation"
+    ));
+
+    scene.timeline->addEvent(new ObjectMovementEvent(
+      0.0f,
+      "woman",
+      glm::vec3(3.9f, 0.1f, -1.4f),
+      glm::vec3(0.0f, 5.0f, 0.0f),
+      0.0f,
+      "Init woman; "
+    ));
   }
 
 public:
@@ -550,6 +748,45 @@ public:
           std::cout << "Windowed mode" << std::endl;
         }
       }
+
+      if (key == GLFW_KEY_T) {
+        scene.useTimeline = !scene.useTimeline;
+        scene.allowManualCamera = !scene.useTimeline;
+        std::cout << "Timeline: " << (scene.useTimeline ? "ON" : "OFF") << std::endl;
+
+        if (scene.useTimeline && scene.timeline) {
+          scene.timeline->initializeCameraPosition(scene);
+          scene.timeline->initializeObjectPositions(scene);
+          scene.timeline->initializeAnimations(scene);
+          scene.timeline->printUpcomingEvents(20.0f);
+        }
+      }
+
+      if (key == GLFW_KEY_SPACE) {
+        if (scene.timeline) {
+          scene.timeline->reset();
+
+          scene.timeline->initializeCameraPosition(scene);
+          scene.timeline->initializeObjectPositions(scene);
+          scene.timeline->initializeAnimations(scene);
+
+          scene.useTimeline = true;
+          scene.allowManualCamera = false;
+          std::cout << "Timeline restarted!" << std::endl;
+        }
+      }
+
+      if (key == GLFW_KEY_ENTER) {
+        if (scene.timeline) {
+          if (scene.timeline->isPaused()) {
+            scene.timeline->resume();
+            scene.allowManualCamera = false;
+          } else {
+            scene.timeline->pause();
+            scene.allowManualCamera = true;
+          }
+        }
+      }
     }
   }
 
@@ -590,6 +827,9 @@ int main() {
   std::cout << "R - Reset camera position" << std::endl;
   std::cout << "P - Print camera position and rotation" << std::endl;
   std::cout << "F - Toggle fullscreen" << std::endl;
+  std::cout << "T - Toggle timeline" << std::endl;
+  std::cout << "SPACE - Start/Restart timeline" << std::endl;
+  std::cout << "ENTER - Pause/Resume timeline" << std::endl;
   std::cout << "=================" << std::endl;
 
   SceneWindow window;

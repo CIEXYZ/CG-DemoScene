@@ -1,8 +1,17 @@
 #include "scene.h"
+#include "Timeline.h"
 #include <GLFW/glfw3.h>
 
 void Scene::update(float dt) {
-  updateCamera(dt);
+  if (useTimeline && timeline) {
+    timeline->update(*this, dt);
+  }
+  if (allowManualCamera || !useTimeline) {
+    updateCamera(dt);
+  }
+  else {
+    camera->update();
+  }
 
   for (auto& obj : objects) {
     obj->update(*this, dt);

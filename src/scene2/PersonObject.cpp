@@ -3,7 +3,7 @@
 #include <iostream>
 
 // Use the same diffuse fragment shader
-#include <shaders/animated_vert_glsl.h> //TODO: merge 2 shaders or make interpolation in diffuse shader
+#include <shaders/animated_vert_glsl.h>
 #include <shaders/diffuse_frag_glsl.h>
 
 PersonObject::PersonObject(const std::string& modelPath) {

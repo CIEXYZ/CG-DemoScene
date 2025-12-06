@@ -10,6 +10,8 @@
 #include "grid.h"
 #include "lighting.h"
 
+class Timeline;
+
 class Scene {
 public:
   void update(float dt);
@@ -34,6 +36,8 @@ public:
 
   std::unique_ptr<Grid> grid;
 
+  std::unique_ptr<Timeline> timeline;
+
   std::list<std::shared_ptr<Object>> objects;
 
   std::map< int, int > keyboard;
@@ -44,6 +48,9 @@ public:
     double x, y;
     bool left, right;
   } cursor;
+
+  bool useTimeline = false;
+  bool allowManualCamera = true;
 };
 
 #endif // _PPGSO_SCENE_H

@@ -195,6 +195,8 @@ add_executable(scene2
         src/scene2/AnimationLoader.h
         src/scene2/AnimatedMesh.cpp
         src/scene2/AnimatedMesh.h
+        src/scene2/Timeline.cpp
+        src/scene2/Timeline.h
         src/scene2/DustParticle.cpp
         src/scene2/DustParticle.h
         src/scene2/DustEmitter.cpp
