@@ -13,12 +13,12 @@
 
 ### Scéna
 - [ ] (2b) Procedurálne generovaná scéna
-- [X] (4b) Hierarchická reprezentácia scény
+- [ ] (4b) Hierarchická reprezentácia scény
 - [ ] (2b) Využitie techniky mapovania na kocku (cube mapping)
 
 ### Animované objekty
 - [ ] (2b) Procedurálna animácia
-- [ ] (3b) Animácia na základe dát uložených v kľúčových snímkoch a interpolácie
+- [X] (3b) Animácia na základe dát uložených v kľúčových snímkoch a interpolácie
 - [ ] (1b) Animácia riadená komplexnými animačnými krivkami pre plynulý pohyb (lineárna interpolácia a smoothstep funkcia nestačí)
 
 ### Simulácia, časticový systém
@@ -28,7 +28,7 @@
 
 ### Práca s kamerou
 - [X] (1b) Kamera s perspektívnou projekciou, správna zmena veľkosti okna a zobrazovacieho priestoru
-- [ ] (2b) Animovaná kamera pomocou kľúčových snímkov, ktoré obsahujú informáciu v danom čase kde sa kamera nachádza a kam sa pozerá, použitie inej ako lineárnej interpolácie
+- [X] (2b) Animovaná kamera pomocou kľúčových snímkov, ktoré obsahujú informáciu v danom čase kde sa kamera nachádza a kam sa pozerá, použitie inej ako lineárnej interpolácie
 
 ### Osvetlenie za pomoci viacerých svetelných zdrojov
 - [ ] (3b) Použitie všetkých typov zdrojov svetla s príslušnými parametrami: smerové, bodové, reflektor

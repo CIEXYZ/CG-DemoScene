@@ -26,16 +26,14 @@ void CameraMovementEvent::execute(Scene& scene) {
 }
 
 static glm::vec3 cubicBezier(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, float t){
-    float t2 = t * t;
-    float t3 = t2 * t;
+    glm::vec3 a = glm::mix(p0, p1, t);
+    glm::vec3 b = glm::mix(p1, p2, t);
+    glm::vec3 c = glm::mix(p2, p3, t);
 
-    float u = 1.0f - t;
-    float tt = t * t;
-    float uu = u * u;
-    float uuu = uu * u;
-    float ttt = tt * t;
+    glm::vec3 d = glm::mix(a, b, t);
+    glm::vec3 e = glm::mix(b, c, t);
 
-    return uuu * p0 + 3.0f * uu * t * p1 + 3.0f * u * tt * p2 + ttt * p3;
+    return glm::mix(d, e, t);
 }
 
 void CameraMovementEvent::update(Scene& scene, float dt) {
