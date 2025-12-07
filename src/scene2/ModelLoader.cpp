@@ -5,7 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <assimp/scene.h>
-
+//not
 std::map<std::string, std::shared_ptr<ppgso::Texture>> ModelLoader::textureCache;
 
 std::string getFileExtension(const std::string& path) {
