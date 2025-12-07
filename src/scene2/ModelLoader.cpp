@@ -5,7 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <assimp/scene.h>
-
+//not
 std::map<std::string, std::shared_ptr<ppgso::Texture>> ModelLoader::textureCache;
 
 std::string getFileExtension(const std::string& path) {
@@ -59,11 +59,8 @@ std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& 
     auto it = textureCache.find(path);
 
     if (it != textureCache.end()) {
-        std::cout << "using texture cache" << std::endl;
         return it->second;
     }
-
-    std::cout << "loading texture from disk" << std::endl;
 
     try {
         std::shared_ptr<ppgso::Texture> texture;
@@ -74,7 +71,6 @@ std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& 
 
         if (texture) {
             textureCache[path] = texture;
-            std::cout << "✓ Cached texture: " << path << std::endl;
         }
 
         return texture;
@@ -85,29 +81,6 @@ std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& 
     }
 }
 
-// std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFileShared(const std::string& path) {
-//
-//
-//     std::string ext = getFileExtension(path);
-//     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-//
-//     std::shared_ptr<ppgso::Texture> texture;
-//
-//     try {
-//         if (ext == ".bmp") {
-//             texture = std::make_shared<ppgso::Texture>(ppgso::image::loadBMP(path));
-//         } else if (ext == ".png") {
-//             texture = std::make_shared<>(path);
-//         } else {
-//             texture = std::make_shared<ppgso::Texture>(loadImageFile(path));
-//         }
-//         return texture;
-//
-//     } catch (const std::exception& e) {
-//         std::cerr << "Failed to load texture " << path << ": " << e.what() << std::endl;
-//         return nullptr;
-//     }
-// }
 
 //Placeholder texture
 std::unique_ptr<ppgso::Texture> ModelLoader::createWhiteTexture() {
@@ -137,8 +110,8 @@ std::map<unsigned int, std::shared_ptr<ppgso::Texture>> ModelLoader::loadTexture
     }
 
     std::string baseDir = mesh->getBasePath();
-    std::cout << "Loading textures from: " << baseDir << std::endl;
-    std::cout << "Number of materials: " << scene->mNumMaterials << std::endl;
+    // std::cout << "Loading textures from: " << baseDir << std::endl;
+    // std::cout << "Number of materials: " << scene->mNumMaterials << std::endl;
 
     // Load texture for each material
     for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
@@ -147,7 +120,7 @@ std::map<unsigned int, std::shared_ptr<ppgso::Texture>> ModelLoader::loadTexture
         // Get material name
         aiString materialName;
         material->Get(AI_MATKEY_NAME, materialName);
-        std::cout << "\nMaterial " << i << ": " << materialName.C_Str() << std::endl;
+        // std::cout << "\nMaterial " << i << ": " << materialName.C_Str() << std::endl;
 
         // Try to load diffuse texture
         if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
@@ -155,23 +128,23 @@ std::map<unsigned int, std::shared_ptr<ppgso::Texture>> ModelLoader::loadTexture
             material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath);
 
             std::string texPathStr = texPath.C_Str();
-            std::cout << "  Texture path from FBX: " << texPathStr << std::endl;
+            // std::cout << "  Texture path from FBX: " << texPathStr << std::endl;
 
             // Find the actual file
             std::string fullPath = findTextureFile(texPathStr, baseDir);
 
             if (!fullPath.empty()) {
-                std::cout << "  Loading: " << fullPath << std::endl;
+                // std::cout << "  Loading: " << fullPath << std::endl;
                 auto texture = loadTextureFile(fullPath);
                 if (texture) {
                     materialTextures[i] = std::move(texture);
-                    std::cout << "  Successfully loaded!" << std::endl;
+                    // std::cout << "  Successfully loaded!" << std::endl;
                 }
             } else {
-                std::cerr << "  Texture file not found!" << std::endl;
+                // std::cerr << "  Texture file not found!" << std::endl;
             }
         } else {
-            std::cout << "  No diffuse texture specified" << std::endl;
+            // std::cout << "  No diffuse texture specified" << std::endl;
         }
     }
 

@@ -191,6 +191,10 @@ add_executable(scene2
         src/scene2/AnimationLoader.h
         src/scene2/AnimatedMesh.cpp
         src/scene2/AnimatedMesh.h
+        src/scene2/DustParticle.cpp
+        src/scene2/DustParticle.h
+        src/scene2/DustEmitter.cpp
+        src/scene2/DustEmitter.h
 )
 target_link_libraries(scene2 ppgso shaders)
 install (TARGETS scene2 DESTINATION .)

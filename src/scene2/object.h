@@ -27,8 +27,9 @@ public:
   bool billboarding = false;
   bool hasCollision = false; //turn on for objects that need it
   bool usesGravity = false;
-  bool isStatic = true;
   bool isGrounded = false;
+  bool forceTransparent = false;
+  bool isParticle = false;
 
   AABB boundingBox;
 
@@ -37,11 +38,10 @@ public:
   glm::vec3 acceleration = glm::vec3(0.0f);
   glm::vec3 forces = glm::vec3(0.0f);
 
-  //====something========
-  static std::shared_ptr<Object> coloredObject(
-  const glm::vec3 &position,
-  const glm::vec3 &scale
-  );
+  glm::vec3 angularVelocity = glm::vec3(0.0f);
+  glm::vec3 torque = glm::vec3(0.0f);
+  float momentOfInertia = 1.0f;
+
 
   Object() = default;
   Object(const std::string& modelPath);
@@ -66,6 +66,9 @@ public:
   bool collidesWithOther(const Object &otherObject) const;
   void applyForces(const glm::vec3 &force);
   void clearForce();
+  void applyTorque(const glm::vec3& t) { torque += t; }
+  void clearTorque() { torque = glm::vec3(0.0f); }
+
 
 protected:
   void generateModelMatrix();

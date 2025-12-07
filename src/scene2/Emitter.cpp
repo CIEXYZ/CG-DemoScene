@@ -10,7 +10,7 @@ Emitter::Emitter(std::shared_ptr<ppgso::Mesh_Assimp> smokeMesh, const std::strin
     this->smokeTexture = ModelLoader::loadTextureFile(smokeTexture);
     this->smokeMesh = smokeMesh;
 
-    spawnRate = 2.f;
+    spawnRate = 5.f;
     lastSpawnTime = 0.f;
     isActive = true;
     spawnPosition = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -21,7 +21,7 @@ void Emitter::update(Scene &scene, float dt) {
     if (isActive) {
         lastSpawnTime += dt;
 
-        float spawnInterval = 1.f / spawnRate;
+        float spawnInterval = .1f / spawnRate;
 
         if (lastSpawnTime > spawnInterval) {
             auto cloud = std::make_unique<SmokeCloud>(smokeMesh, smokeTexture);
