@@ -197,6 +197,12 @@ add_executable(scene2
         src/scene2/AnimatedMesh.h
         src/scene2/Timeline.cpp
         src/scene2/Timeline.h
+        src/scene2/Crowd.cpp
+        src/scene2/Crowd.h
+        src/scene2/PoissonDiskSampler.cpp
+        src/scene2/PoissonDiskSampler.h
+        src/scene2/Timeline.cpp
+        src/scene2/Timeline.h
         src/scene2/DustParticle.cpp
         src/scene2/DustParticle.h
         src/scene2/DustEmitter.cpp

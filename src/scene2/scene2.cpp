@@ -15,6 +15,7 @@
 #include "WhiskeyGlassObject.h"
 #include "PersonObject.h"
 #include "Timeline.h"
+#include "Crowd.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -68,13 +69,13 @@ private:
     man2->scale = {.008f, .008f, .008f};
     scene.objects.push_back(man2); //Man with different texture
 
-    // auto woman = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/dance1_animation.fbx");
-    // woman->loadAnimation("models/people/female/animations/sit_animation.fbx");
-    // woman->name = "woman";
-    // woman->position = {3.0f, 0.0f, 0.0f};
-    // woman->rotation = {0.0f, 0.0f, 0.0f};
-    // woman->scale = {.009f, .009f, .009f};
-    // scene.objects.push_back(woman); //Woman
+    auto woman = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/dance1_animation.fbx");
+    woman->loadAnimation("models/people/female/animations/sit_animation.fbx");
+    woman->name = "woman";
+    woman->position = {3.0f, 0.0f, 0.0f};
+    woman->rotation = {0.0f, 0.0f, 0.0f};
+    woman->scale = {.009f, .009f, .009f};
+    scene.objects.push_back(woman); //Woman
 
     auto madMan = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
     madMan->name = "madMan";
@@ -104,13 +105,31 @@ private:
     manNpc->scale = {.008f, .008f, .008f};
     scene.objects.push_back(manNpc); //Man with different texture
 
-    // auto womanNpc = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/idle_animation.fbx");
-    // womanNpc->loadAnimation("models/people/female/animations/sit_animation.fbx");
-    // womanNpc->name = "womanNpc";
-    // womanNpc->position = {10.0f, 0.0f, -3.0f};
-    // womanNpc->rotation = {0.0f, 0.0f, 0.0f};
-    // womanNpc->scale = {.009f, .009f, .009f};
-    // scene.objects.push_back(womanNpc); //Woman
+    auto womanNpc = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/idle_animation.fbx");
+    womanNpc->loadAnimation("models/people/female/animations/sit_animation.fbx");
+    womanNpc->name = "womanNpc";
+    womanNpc->position = {10.0f, 0.0f, -3.0f};
+    womanNpc->rotation = {0.0f, 0.0f, 0.0f};
+    womanNpc->scale = {.009f, .009f, .009f};
+    scene.objects.push_back(womanNpc); //Woman
+
+    auto crowd = std::make_shared<Crowd>();
+
+    crowd->addPersonType(man2, {
+        "models/people/male/textures/hero_baseColor.png",
+        "models/people/male/textures/hero_baseColor-red.png"
+    });
+
+    crowd->addPersonType(woman, {
+        "models/people/female/textures/female_baseColor.png"
+    });
+
+    // Generate crowd with gap in center (for line formation)
+    PoissonDiskSampler::Rect bounds(-2, -2, 3.8, 6);
+    PoissonDiskSampler::Rect gap(0, 1.5, 4, 0.54);  // Small line gap in center
+    crowd->generateCrowd(bounds, 0.5f, glm::vec3(0,0,0), glm::vec3(0.008f), &gap);
+
+    scene.objects.push_back(crowd);
 
     //Other objects
     auto danceFloor = std::make_shared<DanceFloorObject>();
@@ -642,30 +661,29 @@ private:
       "Perspective on dancefloor;"
     ));
 
-    // //Woman timeline
-    // scene.timeline->addEvent(new ObjectAnimationEvent(
-    //   0.0f,
-    //   "woman",
-    //   1,
-    //   "Woman; sit_animation"
-    // ));
-    //
-    // scene.timeline->addEvent(new ObjectMovementEvent(
-    //   0.0f,
-    //   "woman",
-    //   glm::vec3(3.9f, 0.1f, -1.4f),
-    //   glm::vec3(0.0f, 5.0f, 0.0f),
-    //   0.0f,
-    //   "Init woman; "
-    // ));
-
-    //Man timeline
     //Woman timeline
+    scene.timeline->addEvent(new ObjectAnimationEvent(
+      0.0f,
+      "woman",
+      1,
+      "Woman; sit_animation"
+    ));
+
+    scene.timeline->addEvent(new ObjectMovementEvent(
+      0.0f,
+      "woman",
+      glm::vec3(3.9f, 0.1f, -1.4f),
+      glm::vec3(0.0f, 5.0f, 0.0f),
+      0.0f,
+      "Init woman; "
+    ));
+
+    //Barman timeline
     scene.timeline->addEvent(new ObjectAnimationEvent(
       0.0f,
       "man2",
       0,
-      "Woman; sit_animation"
+      "Barman; bartending_animation"
     ));
 
     scene.timeline->addEvent(new ObjectMovementEvent(
@@ -674,7 +692,7 @@ private:
       glm::vec3(1.9f, 0.1f, -1.4f),
       glm::vec3(0.0f, 5.0f, 0.0f),
       0.0f,
-      "Init woman; "
+      "Init barman; "
     ));
   }
 
