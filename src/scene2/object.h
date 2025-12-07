@@ -27,8 +27,9 @@ public:
   bool billboarding = false;
   bool hasCollision = false; //turn on for objects that need it
   bool usesGravity = false;
-  bool isStatic = true;
   bool isGrounded = false;
+  bool forceTransparent = false;
+  bool isParticle = false;
 
   AABB boundingBox;
 

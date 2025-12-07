@@ -9,6 +9,7 @@
 #include "Emitter.h"
 #include "scene.h"
 #include "DanceFloorObject.h"
+#include "DustEmitter.h"
 #include "WhiskeyGlassObject.h"
 #include "PersonObject.h"
 
@@ -40,14 +41,17 @@ private:
   //Loading all models
   void loadObjects() {
     auto man = std::make_shared<Object>("models/people/male/scene.gltf");
-    man->position = {7.0f, 0.0f, .0f};
+    man->position = {0.0f, 0.0f, .0f};
     man->rotation = {1.55f, 0.0f, 0.0f};
     man->scale = {.01f, .01f, .01f};
+    man->hasCollision = true;
+    man->boxSize = glm::vec3(74.27f, 190.95f, 32.02f);
     scene.objects.push_back(man); //Man with default texture
 
     auto man1 = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
     man1->position = {8.0f, 0.0f, .0f};
     man1->rotation = {1.55f, 0.0f, 0.0f};
+    man->boxSize = glm::vec3(37.47f, 380.95f, 16.01f); //74.47, 190.95f 32.02
     man1->scale = {.01f, .01f, .01f};
     scene.objects.push_back(man1); //Man with different texture
 
@@ -90,19 +94,38 @@ private:
     whiskeyGlass->transparency = .4f;
     scene.objects.push_back(whiskeyGlass); //Whiskey glass
 
+    //smokeCloud effect without collision or physics===========================
     auto quadMesh = std::make_shared<ppgso::Mesh_Assimp>("models/smoke_cloud/plane.obj");
     auto smokeCloud = std::make_shared<Emitter>(quadMesh, "models/smoke_cloud/smoke_cloud_transparent.png");
     smokeCloud->position = {0.0f, 0.0f, 0.0f};
     smokeCloud->spawnPosition = {0.0f, 0.2f, 0.0f};
-    smokeCloud->spawnRate = 1.f;
     scene.objects.push_back(std::move(smokeCloud));
 
     auto quadMesh2 = std::make_shared<ppgso::Mesh_Assimp>("models/smoke_cloud/plane.obj");
     auto smokeCloud2 = std::make_shared<Emitter>(quadMesh2, "models/smoke_cloud/smoke_cloud_transparent.png");
     smokeCloud2->position = {0.0f, 0.0f, 0.0f};
     smokeCloud2->spawnPosition = {0.f, 0.2f, 2.0f};
-    smokeCloud2->spawnRate = 1.f;
     scene.objects.push_back(std::move(smokeCloud2));
+
+    //===============dust particles======================
+    auto quadMeshDust = std::make_shared<ppgso::Mesh_Assimp>("models/dust_particle/dustParticle.obj");
+    auto dust = std::make_shared<DustEmitter>(quadMeshDust, "models/dust_particle/dustParticle.png");
+    dust->position = {0.0f, 4.0f, 0.0f};
+    scene.objects.push_back(std::move(dust));
+
+    auto quadMeshDust2 = std::make_shared<ppgso::Mesh_Assimp>("models/dust_particle/dustParticle.obj");
+    auto dust2 = std::make_shared<DustEmitter>(quadMeshDust2, "models/dust_particle/dustParticle.png");
+    dust2->position = {-3.f, 2.4f, 0.0f};
+    dust2->spawnAreaMax = glm::vec3(-1.0f, 0.0f, -5.0f);
+    dust2->spawnAreaMin = glm::vec3(1.0f, 0.0f, 5.0f);
+    scene.objects.push_back(std::move(dust2));
+
+    auto quadMeshDust3 = std::make_shared<ppgso::Mesh_Assimp>("models/dust_particle/dustParticle.obj");
+    auto dust3 = std::make_shared<DustEmitter>(quadMeshDust3, "models/dust_particle/dustParticle.png");
+    dust3->position = {3.f, 2.4f, 0.0f};
+    dust3->spawnAreaMax = glm::vec3(-1.0f, 0.0f, -5.0f);
+    dust3->spawnAreaMin = glm::vec3(1.0f, 0.0f, 5.0f);
+    scene.objects.push_back(std::move(dust3));
   }
 
   //Create scene

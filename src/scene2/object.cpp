@@ -96,60 +96,80 @@ void Object::update(Scene &scene, float dt) {
         modelMatrix = glm::scale(modelMatrix, scale);
     }
 
-    if (!isStatic) {
-        bool wasGrounded = isGrounded;
-
-        if (usesGravity && !wasGrounded) {
+    if (isParticle) {
+        if (usesGravity) {
             glm::vec3 gravity = glm::vec3(0.f, -9.81f, 0.f) * mass;
             applyForces(gravity);
         }
-        glm::vec3 dragForce = -velocity * (1.f - drag);
-        applyForces(dragForce);
 
         acceleration = forces / mass;
         velocity += acceleration * dt;
+        velocity *= drag;
 
         oldPosition = position;
         position = position + (velocity) * dt;
-
         clearForce();
 
-        glm::vec3 angularDrag = -angularVelocity * (1.0f - drag);
-        applyTorque(angularDrag);
-
         glm::vec3 angularAcceleration = torque / momentOfInertia;
-
         angularVelocity += angularAcceleration * dt;
+        angularVelocity *= 0.99f; //drag
+
+        float maxAngularSpeed = 10.0f;  // radians per second
+        if (glm::length(angularVelocity) > maxAngularSpeed) {
+            angularVelocity = glm::normalize(angularVelocity) * maxAngularSpeed;
+        }
 
         rotation += angularVelocity * dt;
+        rotation.x = fmod(rotation.x, 6.28318f);
+        rotation.y = fmod(rotation.y, 6.28318f);
+        rotation.z = fmod(rotation.z, 6.28318f);
 
-        clearTorque();  // Clear torque for next frame
+        clearTorque();
 
         if (hasCollision) {
             boundingBox.update(position, scale * boxSize, boxOffset);
         }
 
+        isGrounded = false;
+
         for (auto &obj : scene.objects) {
             bool shouldResponse = obj.get() != this && obj->hasCollision && collidesWithOther(*obj);
 
             if (shouldResponse) {
-                if (velocity.y < .0f) {
+                //checks if particle lands directly on top of the model in which case it should stop and disappear
+                std::cout << "Collision detected! velocity.y BEFORE response: " << velocity.y
+          << ", isGrounded: " << (isGrounded ? "true" : "false") << std::endl;
+
+                bool landingOnTop = velocity.y < 0.0f && position.y > obj->boundingBox.max.y - 0.1f;
+
+                if (landingOnTop) {
+                    std::cout << "landed on top of the model should stop moving" << std::endl;
+
                     stopOnYAxis(obj);
+                    isGrounded = true;
+                    break;
+                }else {
+                    std::cout << "side collision - deflecting only" << std::endl;
+
+                    if (velocity.x != .0f) {
+                        std::cout << "collision detected x, velocity.y = " << velocity.y << std::endl;
+
+                        stopOnXAxis(obj);
+                    }
+                    if (velocity.z != .0f) {
+                        std::cout << "collision detected z, velocity.y = " << velocity.y << std::endl;
+
+                        stopOnZAxis(obj);
+                    }
+                    break;
                 }
-                if (velocity.x != .0f) {
-                    stopOnXAxis(obj);
-                }
-                if (velocity.z != .0f) {
-                    stopOnZAxis(obj);
-                }
-                break;
             }
         }
     }
-
     if (hasCollision) {
         boundingBox.update(position, scale * boxSize, boxOffset);
     }
+
 }
 
 void Object::stopOnYAxis(std::shared_ptr<Object> &obj) {
@@ -164,7 +184,6 @@ void Object::stopOnXAxis(std::shared_ptr<Object> &obj) {
     }else {
         position.x = obj->boundingBox.max.x + (boundingBox.getSize().x * .5f);
     }
-
     velocity.x = 0.0f;
     boundingBox.update(position, scale * boxSize, boxOffset);
 }
@@ -253,11 +272,12 @@ void Object::render(Scene &scene) {
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 
+    // forceTransparent is used for dust particles
     for (size_t i = 0; i < meshCount; ++i) {
         bool isTransparent = isMeshTransparent(mesh->getMeshName(i));
 
         // Skip transparent meshes in first pass
-        if (isTransparent || billboarding) continue;
+        if (isTransparent || billboarding || forceTransparent) continue;
 
         // Set texture
         auto it = materialTextures.find(mesh->getMaterialIndex(i));
@@ -269,7 +289,7 @@ void Object::render(Scene &scene) {
     }
 
     // Second pass: render transparent meshes
-    if (transparentMeshNames.empty() && !billboarding) {
+    if (transparentMeshNames.empty() && !billboarding && !forceTransparent) {
         return;
     }
 
@@ -285,7 +305,7 @@ void Object::render(Scene &scene) {
     for (size_t i = 0; i < meshCount; ++i) {
         bool isTransparent = isMeshTransparent(mesh->getMeshName(i));
 
-        if (isTransparent || billboarding) {
+        if (isTransparent || billboarding  || forceTransparent) {
             // Find the mesh center by searching through the scene hierarchy
             std::string meshName = mesh->getMeshName(i);
             glm::vec3 meshLocalCenter = findMeshCenterByName(aiSceneData, meshName, glm::mat4(1.0f));
@@ -304,10 +324,11 @@ void Object::render(Scene &scene) {
 
     // Set transparent state
     shader->setUniform("Transparency", transparency);
-    shader->setUniform("DisableLighting", true);
+    shader->setUniform("DisableLighting", true);// we are disabling lighting because it makes clouds black when looking at them form the back
     glDepthMask(GL_FALSE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_CULL_FACE);//needed to render particles from the back
 
     // Render transparent meshes in sorted order
     for (const auto& meshInfo : transparentMeshes) {
@@ -324,6 +345,8 @@ void Object::render(Scene &scene) {
     shader->setUniform("Transparency", 1.0f);
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+
 }
 
 void Object::generateModelMatrix() {
@@ -340,7 +363,7 @@ bool Object::collidesWithOther(const Object &otherObject) const {
 }
 
 void Object::applyForces(const glm::vec3 &force) {
-    if (!isStatic) {
+    if (isParticle) {
         forces += force;
     }
 }

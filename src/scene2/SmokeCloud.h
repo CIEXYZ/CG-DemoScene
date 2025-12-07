@@ -19,4 +19,5 @@ public:
     float age;
     float fadeStart;
     float initialScale;
+
 };

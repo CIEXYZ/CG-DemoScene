@@ -15,9 +15,11 @@ public:
     void update(Scene &scene, float dt) override;
 
     float age = 0.0f;
-    float life = 5.0f;
-    float fadeStart = 0.7f;
-    float initialScale = 0.1f;
+    float life = 12.0f;
+    float initialScale = glm::linearRand(0.01f, 0.03f);
+    float fadeoutDur = 2.f;
+    float timeSinceGrounded = 0.0f;
+
 };
 
 
