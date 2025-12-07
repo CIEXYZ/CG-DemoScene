@@ -225,6 +225,36 @@ void AnimatedMesh::renderSingleMesh(size_t bufferIndex) {
     }
 }
 
+void AnimatedMesh::renderSingleMeshInstanced(size_t bufferIndex, GLsizei instanceCount) {
+    if (bufferIndex < buffers.size()) {
+        auto& buffer = buffers[bufferIndex];
+        glBindVertexArray(buffer.vao);
+        glDrawElementsInstanced(GL_TRIANGLES, buffer.size, GL_UNSIGNED_INT, nullptr, instanceCount);
+    }
+}
+
+void AnimatedMesh::setupInstancedAttributes(size_t bufferIndex, GLuint instanceMatrixVBO, GLuint instanceTextureVBO) {
+    if (bufferIndex >= buffers.size()) return;
+
+    auto& buffer = buffers[bufferIndex];
+    glBindVertexArray(buffer.vao);
+
+    // Setup instance matrix
+    glBindBuffer(GL_ARRAY_BUFFER, instanceMatrixVBO);
+    for (int i = 0; i < 4; i++) {
+        glEnableVertexAttribArray(5 + i);
+        glVertexAttribPointer(5 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4) * i));
+        glVertexAttribDivisor(5 + i, 1); // One matrix per instance
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, instanceTextureVBO);
+    glEnableVertexAttribArray(9);
+    glVertexAttribPointer(9, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)0);
+    glVertexAttribDivisor(9, 1);
+
+    glBindVertexArray(0);
+}
+
 std::string AnimatedMesh::getMeshName(size_t bufferIndex) const {
     if (bufferIndex < buffers.size()) {
         return buffers[bufferIndex].meshName;

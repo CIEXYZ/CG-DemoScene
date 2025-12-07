@@ -53,6 +53,10 @@ uniform sampler2D Texture;
 uniform sampler2D NormalMap;
 uniform bool useNormalMap;
 
+// Texture array for instanced rendering
+uniform sampler2D TextureArray[16];
+uniform int TextureArraySize;
+
 // Material properties
 uniform Material material;
 
@@ -76,9 +80,21 @@ uniform bool DisableLighting;
 uniform bool useBlinnPhong;
 uniform vec3 ColorTint = vec3(1.0, 1.0, 1.0);
 
+uniform bool useInstancing;
+
+// The vertex shader will feed this input
+in vec2 texCoord;
+
+// Wordspace normal passed from vertex shader
+in vec4 normal;
+
+// Texture index from instancing
+flat in int textureIndex;
+
 // Legacy uniform variable
 uniform vec3 LightDirection;
 
+// The final color
 out vec4 FragmentColor;
 
 // Function declarations
@@ -90,6 +106,12 @@ vec3 getNormal();
 void main() {
     // Sample texture with offset
     vec4 texColor = texture(Texture, vec2(texCoord.x, 1.0 - texCoord.y) + TextureOffset);
+
+    if (useInstancing && textureIndex >= 0 && textureIndex < TextureArraySize) {
+      texColor = texture(TextureArray[textureIndex], vec2(texCoord.x, 1.0 - texCoord.y) + TextureOffset);
+    } else {
+       texColor = texture(Texture, vec2(texCoord.x, 1.0 - texCoord.y) + TextureOffset);
+    }
 
     // Old lighting for particles, transparent objects
     if (DisableLighting) {

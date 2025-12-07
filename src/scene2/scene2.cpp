@@ -45,10 +45,10 @@ private:
   //Loading all models
   void loadObjects() {
     //People
-    auto man = std::make_shared<Object>("models/people/male/scene.gltf");
-    man->name = "main";
+    auto man = std::make_shared<PersonObject>("models/people/male/scene.gltf", "models/people/male/animations/idle_animation.fbx");
+    man->name = "man";
     man->position = {7.0f, 0.0f, .0f};
-    man->rotation = {1.55f, 0.0f, 0.0f};
+    man->rotation = {0.0f, 0.0f, 0.0f};
     man->scale = {.008f, .008f, .008f};
     man->hasCollision = true;
     man->boxSize = glm::vec3(74.27f, 190.95f, 32.02f);
@@ -62,15 +62,8 @@ private:
     man1->scale = {.008f, .008f, .008f};
     scene.objects.push_back(man1); //Man with different texture
 
-    auto man2 = std::make_shared<PersonObject>("models/people/male/scene.gltf", "models/people/male/animations/idle_animation.fbx");
-    man2->name = "man2";
-    man2->position = {9.0f, 0.0f, .0f};
-    man2->rotation = {0.0f, 0.0f, 0.0f};
-    man2->scale = {.008f, .008f, .008f};
-    scene.objects.push_back(man2); //Man with different texture
-
-    auto woman = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/dance1_animation.fbx");
-    woman->loadAnimation("models/people/female/animations/sit_animation.fbx");
+    auto woman = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/idle_animation.fbx");
+    //woman->loadAnimation("models/people/female/animations/sit_animation.fbx");
     woman->name = "woman";
     woman->position = {3.0f, 0.0f, 0.0f};
     woman->rotation = {0.0f, 0.0f, 0.0f};
@@ -89,45 +82,43 @@ private:
     barman->position = {-3.9f, 0.0f, 0.0f};
     barman->rotation = {-1.57f, 0.0f, -4.8f};
     barman->scale = {.008f, .008f, .008f};
-    scene.objects.push_back(barman); //Man with different texture
+    scene.objects.push_back(barman); //Barman
 
-    auto secutiry = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
-    secutiry->name = "security";
-    secutiry->position = {8.0f, 0.0f, -3.0f};
-    secutiry->rotation = {1.55f, 0.0f, 0.0f};
-    secutiry->scale = {.008f, .008f, .008f};
-    scene.objects.push_back(secutiry); //Man with different texture
-
-    auto manNpc = std::make_shared<Object>(man->getMesh(), "models/people/male/textures/hero_baseColor-red.png");
+    auto manNpc = std::make_shared<PersonObject>("models/people/male/scene.gltf", "models/people/male/animations/idle1_animation.fbx");
     manNpc->name = "manNpc";
     manNpc->position = {9.0f, 0.0f, -3.0f};
-    manNpc->rotation = {1.55f, 0.0f, 0.0f};
+    manNpc->rotation = {0.0f, 0.0f, 0.0f};
     manNpc->scale = {.008f, .008f, .008f};
-    scene.objects.push_back(manNpc); //Man with different texture
+    scene.objects.push_back(manNpc); //Man nps
 
-    auto womanNpc = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/idle_animation.fbx");
+    auto womanNpc = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/dance_animation.fbx");
     womanNpc->loadAnimation("models/people/female/animations/sit_animation.fbx");
     womanNpc->name = "womanNpc";
     womanNpc->position = {10.0f, 0.0f, -3.0f};
     womanNpc->rotation = {0.0f, 0.0f, 0.0f};
     womanNpc->scale = {.009f, .009f, .009f};
-    scene.objects.push_back(womanNpc); //Woman
+    scene.objects.push_back(womanNpc); //Woman npc
 
     auto crowd = std::make_shared<Crowd>();
 
-    crowd->addPersonType(man2, {
+    crowd->addPersonType(manNpc, {
         "models/people/male/textures/hero_baseColor.png",
         "models/people/male/textures/hero_baseColor-red.png"
     });
 
-    crowd->addPersonType(woman, {
+    crowd->addPersonType(womanNpc, {
         "models/people/female/textures/female_baseColor.png"
     });
 
-    // Generate crowd with gap in center (for line formation)
+    //Generate crowd with gap in center (for line formation)
     PoissonDiskSampler::Rect bounds(-2, -2, 3.8, 6);
     PoissonDiskSampler::Rect gap(0, 1.5, 4, 0.54);  // Small line gap in center
     crowd->generateCrowd(bounds, 0.5f, glm::vec3(0,0,0), glm::vec3(0.008f), &gap);
+
+    //Example with 5000+ instances
+    // PoissonDiskSampler::Rect bounds(-25, -25, 26, 26);
+    // PoissonDiskSampler::Rect gap(0, 0, 0, 0);  // Small line gap in center
+    // crowd->generateCrowd(bounds, 0.2f, glm::vec3(0,0,0), glm::vec3(0.008f), &gap);
 
     scene.objects.push_back(crowd);
 
@@ -157,7 +148,6 @@ private:
     scene.building->transparency = 3.f;
 
     scene.objects.push_back(scene.building); //Main Building
-
 
     //loading objects for collisions
     // auto buildingInfo = scene.readMeshCollisions("models/building/scene.gltf", "Floor1_M_Floor_0");

@@ -84,6 +84,12 @@ void PersonObject::setupInstanceBuffers(size_t maxInst) {
     glGenBuffers(1, &instanceMatrixVBO);
     glGenBuffers(1, &instanceTextureVBO);
 
+    // Setup instanced attributes for all meshes
+    size_t meshCount = animMesh->getMeshCount();
+    for (size_t i = 0; i < meshCount; ++i) {
+        animMesh->setupInstancedAttributes(i, instanceMatrixVBO, instanceTextureVBO);
+    }
+
     instanceBuffersSetup = true;
 }
 
@@ -123,6 +129,7 @@ void PersonObject::render(Scene &scene) {
     shader->setUniform("ProjectionMatrix", scene.camera->projectionMatrix);
     shader->setUniform("ViewMatrix", scene.camera->viewMatrix);
     shader->setUniform("ModelMatrix", modelMatrix);
+    shader->setUniform("useInstancing", false);
 
     //MATERIAL PROPERTIES
     shader->setUniform("material.ambient", scene.defaultMaterial.ambient);
@@ -232,14 +239,15 @@ void PersonObject::renderInstanced(Scene &scene, const std::vector<InstanceData>
 
     shader->setUniform("ProjectionMatrix", scene.camera->projectionMatrix);
     shader->setUniform("ViewMatrix", scene.camera->viewMatrix);
+    shader->setUniform("useInstancing", true);
 
     if (hasAnimation && animator) {
         shader->setUniform("hasAnimation", true);
-        auto matrices = animator->getFinalBoneMatrices();
+        auto boneMatrices = animator->getFinalBoneMatrices();
 
-        for (size_t i = 0; i < matrices.size(); ++i) {
+        for (size_t i = 0; i < boneMatrices.size(); ++i) {
             std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
-            shader->setUniform(uniformName, matrices[i]);
+            shader->setUniform(uniformName, boneMatrices[i]);
         }
     } else {
         shader->setUniform("hasAnimation", false);
@@ -248,28 +256,28 @@ void PersonObject::renderInstanced(Scene &scene, const std::vector<InstanceData>
     shader->setUniform("DisableLighting", false);
     shader->setUniform("Transparency", 1.0f);
 
+    // Setup texture array
+    std::vector<ppgso::Texture*> textureArray;
+    for (const auto& [idx, tex] : materialTextures) {
+        textureArray.push_back(tex.get());
+    }
+
+    shader->setUniform("TextureArraySize", (int)textureArray.size());
+
+    // Bind textures
+    for (size_t i = 0; i < textureArray.size() && i < 16; ++i) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, textureArray[i]->getTexture());
+        std::string uniformName = "TextureArray[" + std::to_string(i) + "]";
+        shader->setUniform(uniformName, (int)i);
+    }
+
     size_t meshCount = animMesh->getMeshCount();
 
-    // Render each instance
-    for (const auto& instance : instances) {
-        shader->setUniform("ModelMatrix", instance.modelMatrix);
-
-        for (size_t i = 0; i < meshCount; ++i) {
-            unsigned int matIndex = animMesh->getMaterialIndex(i);
-
-            // Use the texture index from instance data
-            auto it = materialTextures.find(instance.textureIndex);
-            if (it != materialTextures.end()) {
-                shader->setUniform("Texture", *(it->second));
-            } else {
-                // Fallback to material texture
-                it = materialTextures.find(matIndex);
-                if (it != materialTextures.end()) {
-                    shader->setUniform("Texture", *(it->second));
-                }
-            }
-
-            animMesh->renderSingleMesh(i);
-        }
+    // Render all meshes
+    for (size_t i = 0; i < meshCount; ++i) {
+        animMesh->renderSingleMeshInstanced(i, instances.size());
     }
+
+    glActiveTexture(GL_TEXTURE0);
 }
