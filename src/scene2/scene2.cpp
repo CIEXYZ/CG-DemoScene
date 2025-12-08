@@ -49,8 +49,8 @@ private:
     man->loadAnimation("models/people/male/animations/standup_animation.fbx");
     man->loadAnimation("models/people/male/animations/hit_shoulder_animation.fbx");
     man->name = "man";
-    man->position = {7.0f, 0.0f, .0f};
-    man->rotation = {0.0f, 0.0f, 0.0f};
+    man->position = {-0.1f, 0.0f, -0.1f};
+    man->rotation = {0.0f, -5.0f, 0.0f};
     man->scale = {.008f, .008f, .008f};
     man->hasCollision = true;
     man->boxSize = glm::vec3(74.27f, 190.95f, 32.02f);
@@ -83,8 +83,8 @@ private:
 
     auto madMan = std::make_shared<PersonObject>("models/people/male/scene.gltf", "models/people/male/animations/punch_animation.fbx");
     madMan->name = "madMan";
-    madMan->position = {7.0f, 0.0f, .0f};
-    madMan->rotation = {0.0f, 0.0f, 0.0f};
+    madMan->position = {0.4f, 0.0f, -0.1f};
+    madMan->rotation = {0.0f, 5.0f, 0.0f};
     madMan->scale = {.008f, .008f, .008f};
     scene.objects.push_back(madMan); //Mad man
 
@@ -665,6 +665,26 @@ private:
       "Perspective on dancefloor;"
     ));
 
+    scene.timeline->addEvent(new CameraMovementEvent(
+    51.0f,
+      glm::vec3(-1.6f, 1.2f, -0.15f),
+      glm::vec3(-1.6f, 1.2f, -0.15f),
+      glm::vec3(-1.6f, 1.2f, -0.15f),
+      glm::vec3(-180.0f, -70.0f, 0.0f),
+      0.0f,
+      "Perspective on dancefloor;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+    53.0f,
+      glm::vec3(-2.1f, 0.5f, -0.15f),
+      glm::vec3(-2.1f, 0.5f, -0.15f),
+      glm::vec3(-2.1f, 0.5f, -0.15f),
+      glm::vec3(0.0f, 50.0f, 0.0f),
+      0.0f,
+      "Perspective on dancefloor;"
+    ));
+
     //Man1 timeline
     scene.timeline->addEvent(new ObjectAnimationEvent(
       0.0f,
@@ -855,43 +875,45 @@ private:
       "Main on the bar counter;"
     ));
 
-    scene.timeline->addEvent(new ObjectAnimationEvent(
+    scene.timeline->addEvent(new ObjectMovementEvent(
       46.0f,
+      "man",
+      glm::vec3(-2.0f, 0.0f, -0.3f),
+      glm::vec3(0.0f, -5.0f, 0.0f),
+      0.0f,
+      "Main on the bar counter;"
+    ));
+
+    scene.timeline->addEvent(new ObjectMovementEvent(
+      47.0f,
+      "man",
+      glm::vec3(0.05f, 0.0f, -0.3f),
+      glm::vec3(0.0f, -5.0f, 0.0f),
+      1.0f,
+      "Main on the bar counter;"
+    ));
+
+    scene.timeline->addEvent(new ObjectAnimationEvent(
+      47.5f,
       "man",
       2,
       "Main; sit_animation"
     ));
 
     scene.timeline->addEvent(new ObjectMovementEvent(
-      46.0f,
+      48.0f,
       "man",
-      glm::vec3(-2.0f, 0.0f, -0.1f),
-      glm::vec3(0.0f, -5.0f, 0.0f),
-      0.0f,
-      "Main on the bar counter;"
-    ));
-
-    scene.timeline->addEvent(new ObjectMovementEvent(
-      46.0f,
-      "man",
-      glm::vec3(-0.0f, 0.0f, -0.1f),
-      glm::vec3(0.0f, -5.0f, 0.0f),
-      5.0f,
+      glm::vec3(-0.3f, 0.0f, -0.3f),
+      glm::vec3(0.0f, -4.7f, 0.0f),
+      1.0f,
       "Main on the bar counter;"
     ));
 
     //Mad man timeline
-    scene.timeline->addEvent(new ObjectAnimationEvent(
-      0.0f,
-      "madMan",
-      0,
-      "MadMan; punch_animation"
-    ));
-
     scene.timeline->addEvent(new ObjectMovementEvent(
       0.0f,
       "madMan",
-      glm::vec3(0.0f, -5.0f, 0.0f),
+      glm::vec3(0.4f, -5.0f, 0.0f),
       glm::vec3(0.0f, 5.0f, 0.0f),
       0.0f,
       "Init madMan;"
@@ -900,18 +922,25 @@ private:
     scene.timeline->addEvent(new ObjectMovementEvent(
       46.0f,
       "madMan",
-      glm::vec3(0.0f, 0.0f, -0.1f),
+      glm::vec3(1.4f, 0.0f, -0.3f),
       glm::vec3(0.0f, 5.0f, 0.0f),
-      0.1f,
+      0.0f,
       "Init main;"
     ));
 
+    scene.timeline->addEvent(new ObjectAnimationEvent(
+        47.f,
+        "madMan",
+        0,
+        "MadMan; punch_animation"
+      ));
+
     scene.timeline->addEvent(new ObjectMovementEvent(
-      46.0f,
+      47.0f,
       "madMan",
-      glm::vec3(0.4f, 0.0f, -0.1f),
+      glm::vec3(0.4f, 0.0f, -0.3f),
       glm::vec3(0.0f, 5.0f, 0.0f),
-      5.0f,
+      1.0f,
       "Init main;"
     ));
   }
