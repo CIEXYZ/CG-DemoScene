@@ -21,6 +21,7 @@ public:
   glm::vec3 velocity{0.f};
   glm::vec3 oldPosition{0.f};
 
+  bool shouldRender = true;
   float transparency = 1.f;
   float drag = 1.f;
   float mass = 1.f;

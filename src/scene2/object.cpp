@@ -136,29 +136,17 @@ void Object::update(Scene &scene, float dt) {
             bool shouldResponse = obj.get() != this && obj->hasCollision && collidesWithOther(*obj);
 
             if (shouldResponse) {
-                //checks if particle lands directly on top of the model in which case it should stop and disappear
-                std::cout << "Collision detected! velocity.y BEFORE response: " << velocity.y
-          << ", isGrounded: " << (isGrounded ? "true" : "false") << std::endl;
-
                 bool landingOnTop = velocity.y < 0.0f && position.y > obj->boundingBox.max.y - 0.1f;
 
                 if (landingOnTop) {
-                    std::cout << "landed on top of the model should stop moving" << std::endl;
-
                     stopOnYAxis(obj);
                     isGrounded = true;
                     break;
                 }else {
-                    std::cout << "side collision - deflecting only" << std::endl;
-
                     if (velocity.x != .0f) {
-                        std::cout << "collision detected x, velocity.y = " << velocity.y << std::endl;
-
                         stopOnXAxis(obj);
                     }
                     if (velocity.z != .0f) {
-                        std::cout << "collision detected z, velocity.y = " << velocity.y << std::endl;
-
                         stopOnZAxis(obj);
                     }
                     break;
@@ -254,6 +242,7 @@ glm::vec3 findMeshCenterByName(const aiScene* scene, const std::string& meshName
 }
 
 void Object::render(Scene &scene) {
+    if (!shouldRender){return;}
     shader->use();
 
     shader->setUniform("ProjectionMatrix", scene.camera->projectionMatrix);
