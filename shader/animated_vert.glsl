@@ -19,9 +19,9 @@ uniform bool hasAnimation;
 
 out vec2 texCoord;
 
-out vec4 normal;
+out vec3 normal;
 
-out vec3 fragPosition;
+out vec3 FragPos;
 
 void main() {
     vec4 totalPosition = vec4(0.0f);
@@ -37,18 +37,19 @@ void main() {
             }
             vec4 localPosition = finalBonesMatrices[BoneIDs[i]] * vec4(Position, 1.0f);
             totalPosition += localPosition * Weights[i];
-            vec4 localNormal = mat4(finalBonesMatrices[BoneIDs[i]]) * Normal;
-            totalNormal += localNormal * Weights[i];
+
+            vec3 localNormal = mat3(finalBonesMatrices[BoneIDs[i]]) * Normal.xyz;
+            totalNormal.xyz += localNormal * Weights[i];
         }
     } else {
         totalPosition = vec4(Position, 1.0f);
         totalNormal = Normal;
     }
 
-    mat4 modelView = ViewMatrix * ModelMatrix;
-    fragPosition = vec3(ModelMatrix * totalPosition);
-    normal = mat4(transpose(inverse(ModelMatrix))) * totalNormal;
+//    mat4 modelView = ViewMatrix * ModelMatrix;
+    FragPos = vec3(ModelMatrix * totalPosition);
+    normal = normalize(mat3(transpose(inverse(ModelMatrix))) * totalNormal.xyz);
     texCoord = TexCoord;
 
-    gl_Position = ProjectionMatrix * modelView * totalPosition;
+    gl_Position = ProjectionMatrix * ViewMatrix * vec4(FragPos, 1.0f);
 }

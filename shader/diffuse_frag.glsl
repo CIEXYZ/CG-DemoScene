@@ -116,7 +116,7 @@ uniform float Transparency;
 uniform vec2 TextureOffset;
 uniform bool DisableLighting;
 uniform bool useBlinnPhong;
-uniform vec3 ColorTint = vec3(1.0, 1.0, 1.0);  // ✅ Kept your color tint
+uniform vec3 ColorTint = vec3(1.0, 1.0, 1.0);  // Kept your color tint
 
 // Legacy uniform variable
 uniform vec3 LightDirection;
