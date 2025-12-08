@@ -195,6 +195,7 @@ add_executable(scene2
         src/scene2/DustParticle.h
         src/scene2/DustEmitter.cpp
         src/scene2/DustEmitter.h
+        src/scene2/lighting.h
 )
 target_link_libraries(scene2 ppgso shaders)
 install (TARGETS scene2 DESTINATION .)
