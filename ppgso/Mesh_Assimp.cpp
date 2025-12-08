@@ -113,7 +113,6 @@ void ppgso::Mesh_Assimp::processNode(aiNode *node, const aiScene *pScene, const 
         processNode(node->mChildren[i], pScene, globalTransform);
     }
 }
-
 void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
     gl_buffer buffer;
 
@@ -123,6 +122,9 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
     buffer.meshName = mesh->mName.C_Str();
 
     std::cout << "Processing mesh: '" << buffer.meshName << "' with material index: " << buffer.materialIndex << std::endl;
+
+    glm::vec3 min(FLT_MAX);
+    glm::vec3 max(-FLT_MAX);
 
     // Process vertices
     if (mesh->HasPositions()) {
@@ -136,7 +138,17 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
             glm::vec4 vertex = glm::vec4(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z, 1.0f);
             glm::vec4 transformedVertex = transform * vertex;
+            glm::vec3 v3 = glm::vec3(transformedVertex);
             transformedVertices.push_back(glm::vec3(transformedVertex));
+
+            // reads bounds of objects
+            min.x = std::min(min.x, v3.x);
+            min.y = std::min(min.y, v3.y);
+            min.z = std::min(min.z, v3.z);
+
+            max.x = std::max(max.x, v3.x);
+            max.y = std::max(max.y, v3.y);
+            max.z = std::max(max.z, v3.z);
         }
 
         // Extract vertex positions from aiMesh and upload to GPU
@@ -201,7 +213,108 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
         buffer.size = static_cast<GLsizei>(indices.size());
     }
     buffers.push_back(buffer);
+
+    MeshBounds bounds;
+    bounds.meshName = buffer.meshName;
+    bounds.min = min;
+    bounds.max = max;
+    bounds.size = max - min;
+    bounds.center = (min + max) * 0.5f;
+
+    meshBounds.push_back(bounds);
+
+    // std::cout << "  Bounds: min(" << min.x << ", " << min.y << ", " << min.z << ") "
+    //           << "max(" << max.x << ", " << max.y << ", " << max.z << ")" << std::endl;
 }
+
+// void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
+//     gl_buffer buffer;
+//
+//     // Store material index and mesh name for this mesh
+//     buffer.materialIndex = mesh->mMaterialIndex;
+//     buffer.meshIndex = 0;
+//     buffer.meshName = mesh->mName.C_Str();
+//
+//     std::cout << "Processing mesh: '" << buffer.meshName << "' with material index: " << buffer.materialIndex << std::endl;
+//
+//     // Process vertices
+//     if (mesh->HasPositions()) {
+//         // Generate a vertex array object
+//         glGenVertexArrays(1, &buffer.vao);
+//         glBindVertexArray(buffer.vao);
+//
+//         std::vector<glm::vec3> transformedVertices;
+//         transformedVertices.reserve(mesh->mNumVertices);
+//
+//         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+//             glm::vec4 vertex = glm::vec4(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z, 1.0f);
+//             glm::vec4 transformedVertex = transform * vertex;
+//             transformedVertices.push_back(glm::vec3(transformedVertex));
+//         }
+//
+//         // Extract vertex positions from aiMesh and upload to GPU
+//         glGenBuffers(1, &buffer.vbo);
+//         glBindBuffer(GL_ARRAY_BUFFER, buffer.vbo);
+//         glBufferData(GL_ARRAY_BUFFER, transformedVertices.size() * sizeof(glm::vec3), transformedVertices.data(), GL_STATIC_DRAW);
+//         // Enable and set up vertex attribute pointer for positions
+//         glEnableVertexAttribArray(0);
+//         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+//     }
+//
+//     // Process texture coordinates
+//     if (mesh->HasTextureCoords(0)) {
+//         std::vector<aiVector2D> textureCoords;
+//         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+//             aiVector3D texCoord = mesh->mTextureCoords[0][i]; // Assuming single texture channel (index 0)
+//             textureCoords.push_back(aiVector2D(texCoord.x, texCoord.y));
+//         }
+//         glGenBuffers(1, &buffer.tbo);
+//         glBindBuffer(GL_ARRAY_BUFFER, buffer.tbo);
+//         glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(aiVector2D), textureCoords.data(), GL_STATIC_DRAW);
+//
+//         glEnableVertexAttribArray(1);
+//         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+//     }
+//
+//     // Process normals
+//     if (mesh->HasNormals()) {
+//         std::vector<glm::vec3> transformedNormals;
+//         transformedNormals.reserve(mesh->mNumVertices);
+//
+//         glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(transform)));
+//
+//         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+//             glm::vec3 normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+//             glm::vec3 transformedNormal = glm::normalize(normalMatrix * normal);
+//             transformedNormals.push_back(transformedNormal);
+//         }
+//
+//         glGenBuffers(1, &buffer.nbo);
+//         glBindBuffer(GL_ARRAY_BUFFER, buffer.nbo);
+//         glBufferData(GL_ARRAY_BUFFER, transformedNormals.size() * sizeof(glm::vec3), transformedNormals.data(), GL_STATIC_DRAW);
+//
+//         glEnableVertexAttribArray(2);
+//         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+//     }
+//
+//     // Process indices
+//     if (mesh->HasFaces()) {
+//         std::vector<unsigned int> indices;
+//         for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+//             aiFace face = mesh->mFaces[i];
+//             for (unsigned int j = 0; j < face.mNumIndices; ++j) {
+//                 indices.push_back(face.mIndices[j]);
+//             }
+//         }
+//
+//         // Upload indices to GPU
+//         glGenBuffers(1, &buffer.ibo);
+//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.ibo);
+//         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+//         buffer.size = static_cast<GLsizei>(indices.size());
+//     }
+//     buffers.push_back(buffer);
+// }
 
 void ppgso::Mesh_Assimp::render() {
     for (auto &buffer : buffers) {
@@ -245,4 +358,21 @@ std::string ppgso::Mesh_Assimp::getTexturePath(unsigned int materialIndex, aiTex
     }
 
     return "";
+}
+
+ppgso::Mesh_Assimp::MeshBounds ppgso::Mesh_Assimp::getMeshBounds(const std::string& meshName) const {
+    for (const auto& bounds : meshBounds) {
+        if (bounds.meshName == meshName) {
+            return bounds;
+        }
+    }
+
+    // Return default if not found
+    MeshBounds empty;
+    empty.meshName = meshName;
+    empty.min = glm::vec3(0);
+    empty.max = glm::vec3(0);
+    empty.size = glm::vec3(0);
+    empty.center = glm::vec3(0);
+    return empty;
 }

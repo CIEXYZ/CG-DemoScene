@@ -54,6 +54,17 @@ namespace ppgso {
 
     public:
 
+        struct MeshBounds {
+            std::string meshName;
+            glm::vec3 min;
+            glm::vec3 max;
+            glm::vec3 size;
+            glm::vec3 center;
+        };
+
+        std::vector<MeshBounds> meshBounds;
+        MeshBounds getMeshBounds(const std::string& meshName) const;
+
         /*!
          * Load 3D geometry from a na Wavefront .obj file.
          *
