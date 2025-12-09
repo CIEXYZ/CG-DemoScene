@@ -14,20 +14,28 @@ class Scene;
 
 class Object {
 public:
+  std::string name;  // Object name for timeline
+
   glm::vec3 position{0,0,0};
   glm::vec3 rotation{0,0,0};
   glm::vec3 scale{1,1,1};
   glm::mat4 modelMatrix{1};
+
   glm::vec3 velocity{0.f};
   glm::vec3 oldPosition{0.f};
 
   bool shouldRender = true;
   float transparency = 1.f;
+
   float drag = 1.f;
   float mass = 1.f;
+
   bool billboarding = false;
+
   bool hasCollision = false; //turn on for objects that need it
   bool usesGravity = false;
+
+  bool isStatic = true;
   bool isGrounded = false;
   bool forceTransparent = false;
   bool isParticle = false;

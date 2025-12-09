@@ -349,7 +349,7 @@
         32,
         36
       ],
-      "name": "pelvis_01",
+      "name": "pelvis",
       "rotation": [
         0.7904554605484009,
         0.0,
@@ -371,7 +371,7 @@
       "children": [
         10
       ],
-      "name": "spine_02",
+      "name": "spine",
       "rotation": [
         -0.10133819282054901,
         1.1859562221161468e-07,
@@ -395,7 +395,7 @@
         14,
         23
       ],
-      "name": "chest_03",
+      "name": "chest",
       "rotation": [
         -0.07435400038957596,
         -1.1887934903143105e-07,
@@ -417,7 +417,7 @@
       "children": [
         12
       ],
-      "name": "neck_04",
+      "name": "neck",
       "rotation": [
         0.27884364128112793,
         -1.1448100423194774e-07,
@@ -434,7 +434,7 @@
       "children": [
         13
       ],
-      "name": "head_05",
+      "name": "head",
       "rotation": [
         -0.15708428621292114,
         -4.820961541757672e-14,
@@ -448,7 +448,7 @@
       ]
     },
     {
-      "name": "head_end_026",
+      "name": "head_end",
       "rotation": [
         -0.0,
         1.3234889800848443e-23,
@@ -465,7 +465,7 @@
       "children": [
         15
       ],
-      "name": "shoulder_left_06",
+      "name": "shoulder_left",
       "rotation": [
         -0.548248827457428,
         -0.38586997985839844,
@@ -487,7 +487,7 @@
       "children": [
         16
       ],
-      "name": "upper_arm_left_07",
+      "name": "upper_arm_left",
       "rotation": [
         -0.3957825303077698,
         0.6255666017532349,
@@ -509,7 +509,7 @@
       "children": [
         17
       ],
-      "name": "forearm_left_08",
+      "name": "forearm_left",
       "rotation": [
         0.18051894009113312,
         0.09795449674129486,
@@ -532,7 +532,7 @@
         18,
         21
       ],
-      "name": "hand_left_09",
+      "name": "hand_left",
       "rotation": [
         -0.05824553221464157,
         -0.12290994077920914,
@@ -554,7 +554,7 @@
       "children": [
         19
       ],
-      "name": "thumb.01.L_010",
+      "name": "thumb.01.L",
       "rotation": [
         0.20150844752788544,
         0.9061054587364197,
@@ -576,7 +576,7 @@
       "children": [
         20
       ],
-      "name": "thumb.02.L_011",
+      "name": "thumb.02.L",
       "rotation": [
         0.24037128686904907,
         -0.07432889938354492,
@@ -595,7 +595,7 @@
       ]
     },
     {
-      "name": "thumb.02.L_end_027",
+      "name": "thumb.02.L_end",
       "rotation": [
         -1.4444474582904269e-34,
         -1.3877787807814457e-17,
@@ -612,7 +612,7 @@
       "children": [
         22
       ],
-      "name": "f_middle.01.L_012",
+      "name": "f_middle.01.L",
       "rotation": [
         0.1807217001914978,
         0.9821286797523499,
@@ -631,7 +631,7 @@
       ]
     },
     {
-      "name": "f_middle.01.L_end_00",
+      "name": "f_middle.01.L_end",
       "rotation": [
         -1.3877787807814457e-17,
         -1.8958372890061853e-34,
@@ -648,7 +648,7 @@
       "children": [
         24
       ],
-      "name": "shoulder_right_013",
+      "name": "shoulder_right",
       "rotation": [
         -0.548248827457428,
         0.38586997985839844,
@@ -670,7 +670,7 @@
       "children": [
         25
       ],
-      "name": "upper_arm_right_014",
+      "name": "upper_arm_right",
       "rotation": [
         -0.3957825303077698,
         -0.6255666017532349,
@@ -692,7 +692,7 @@
       "children": [
         26
       ],
-      "name": "forearm_right_015",
+      "name": "forearm_right",
       "rotation": [
         0.18051894009113312,
         -0.09795449674129486,
@@ -715,7 +715,7 @@
         27,
         30
       ],
-      "name": "hand_right_016",
+      "name": "hand_right",
       "rotation": [
         -0.05824553221464157,
         0.12290994077920914,
@@ -737,7 +737,7 @@
       "children": [
         28
       ],
-      "name": "thumb.01.R_017",
+      "name": "thumb.01.R",
       "rotation": [
         -0.20150844752788544,
         0.9061054587364197,
@@ -759,7 +759,7 @@
       "children": [
         29
       ],
-      "name": "thumb.02.R_018",
+      "name": "thumb.02.R",
       "rotation": [
         0.24037128686904907,
         0.07432889938354492,
@@ -778,7 +778,7 @@
       ]
     },
     {
-      "name": "thumb.02.R_end_028",
+      "name": "thumb.02.R_end",
       "rotation": [
         2.7755575615628914e-17,
         -1.925929944387236e-34,
@@ -795,7 +795,7 @@
       "children": [
         31
       ],
-      "name": "f_middle.01.R_019",
+      "name": "f_middle.01.R",
       "rotation": [
         -0.1807217001914978,
         0.9821286797523499,
@@ -814,7 +814,7 @@
       ]
     },
     {
-      "name": "f_middle.01.R_end_029",
+      "name": "f_middle.01.R_end",
       "rotation": [
         -1.3877787807814457e-17,
         -3.469446951953614e-18,
@@ -831,7 +831,7 @@
       "children": [
         33
       ],
-      "name": "thigh_left_020",
+      "name": "thigh_left",
       "rotation": [
         0.9949550628662109,
         0.05040258169174194,
@@ -853,7 +853,7 @@
       "children": [
         34
       ],
-      "name": "shin.L_021",
+      "name": "shin.L",
       "rotation": [
         -0.022358359768986702,
         0.007742916699498892,
@@ -870,7 +870,7 @@
       "children": [
         35
       ],
-      "name": "foot_left_022",
+      "name": "foot_left",
       "rotation": [
         -0.570643424987793,
         -0.02170874923467636,
@@ -889,7 +889,7 @@
       ]
     },
     {
-      "name": "foot_left_end_030",
+      "name": "foot_left_end",
       "rotation": [
         -2.7755575615628914e-17,
         1.0842021724855044e-19,
@@ -906,7 +906,7 @@
       "children": [
         37
       ],
-      "name": "thigh_right_023",
+      "name": "thigh_right",
       "rotation": [
         0.9949550628662109,
         -0.05040258169174194,
@@ -928,7 +928,7 @@
       "children": [
         38
       ],
-      "name": "shin.R_024",
+      "name": "shin.R",
       "rotation": [
         -0.022358359768986702,
         -0.007742916699498892,
@@ -945,7 +945,7 @@
       "children": [
         39
       ],
-      "name": "foot_right_025",
+      "name": "foot_right",
       "rotation": [
         -0.570643424987793,
         0.02170874923467636,
@@ -964,7 +964,7 @@
       ]
     },
     {
-      "name": "foot_right_end_031",
+      "name": "foot_right_end",
       "rotation": [
         -2.7755575615628914e-17,
         -1.0842021724855044e-19,

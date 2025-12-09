@@ -21,7 +21,7 @@ private:
 
     GLuint VAO, VBO, EBO, TBO, NBO;
     int indexCount;
-    std::unique_ptr<ppgso::Texture> texture;
+    std::shared_ptr<ppgso::Texture> texture;
 
     struct CubeInstance {
         glm::vec3 position;

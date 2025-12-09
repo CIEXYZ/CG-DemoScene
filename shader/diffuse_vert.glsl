@@ -1,25 +1,21 @@
 #version 330
 
-// Inputs
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec2 TexCoord;
 layout(location = 2) in vec3 Normal;
 layout(location = 3) in vec3 Tangent;
 layout(location = 4) in vec3 Bitangent;
 
-// Matrices
 uniform mat4 ProjectionMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ModelMatrix;
 
-// Outputs to fragment shader
 out vec2 texCoord;
 out vec3 FragPos;
 out vec3 normal;
 out mat3 TBN;
 
 void main() {
-    // Copy texture coordinates
     texCoord = TexCoord;
 
     // Fragment position in world space

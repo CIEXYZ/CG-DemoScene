@@ -6,6 +6,9 @@ layout(location = 2) in vec3 Normal;
 layout(location = 3) in ivec4 BoneIDs;
 layout(location = 4) in vec4 Weights;
 
+layout(location = 5) in mat4 InstanceMatrix;
+layout(location = 9) in float InstanceTextureIndex;
+
 const int MAX_BONES = 100;
 const int MAX_BONE_INFLUENCE = 4;
 
@@ -16,12 +19,15 @@ uniform mat4 ModelMatrix;
 uniform mat4 finalBonesMatrices[MAX_BONES];
 
 uniform bool hasAnimation;
+uniform bool useInstancing;
 
 out vec2 texCoord;
 
 out vec3 normal;
 
 out vec3 FragPos;
+
+flat out int textureIndex;
 
 void main() {
     vec4 totalPosition = vec4(0.0);
@@ -45,11 +51,14 @@ void main() {
         totalNormal = Normal;
     }
 
-    vec4 worldPos = ModelMatrix * totalPosition;
+    mat4 finalModelMatrix = useInstancing ? InstanceMatrix : ModelMatrix;
+
+    vec4 worldPos = finalModelMatrix * totalPosition;
 
     FragPos = worldPos.xyz;
-    normal = normalize(mat3(transpose(inverse(ModelMatrix))) * totalNormal);
+    normal = normalize(mat3(transpose(inverse(finalModelMatrix))) * totalNormal);
     texCoord = TexCoord;
+    textureIndex = int(InstanceTextureIndex);
 
     gl_Position = ProjectionMatrix * ViewMatrix * worldPos;
 }

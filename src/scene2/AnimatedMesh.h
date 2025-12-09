@@ -66,7 +66,10 @@ public:
 
     void render();
     void renderSingleMesh(size_t bufferIndex);
-    
+    void renderSingleMeshInstanced(size_t bufferIndex, GLsizei instanceCount);
+
+    void setupInstancedAttributes(size_t bufferIndex, GLuint instanceMatrixVBO, GLuint instanceTextureVBO);
+
     size_t getMeshCount() const { return buffers.size(); }
     std::string getMeshName(size_t bufferIndex) const;
     unsigned int getMaterialIndex(size_t bufferIndex) const;
