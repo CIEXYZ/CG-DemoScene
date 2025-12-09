@@ -10,7 +10,7 @@ Emitter::Emitter(std::shared_ptr<ppgso::Mesh_Assimp> smokeMesh, const std::strin
     this->smokeTexture = ModelLoader::loadTextureFile(smokeTexture);
     this->smokeMesh = smokeMesh;
 
-    spawnRate = 5.f;
+    spawnRate = 0.5f;
     lastSpawnTime = 0.f;
     isActive = true;
     spawnPosition = glm::vec3(0.0f, 0.0f, 0.0f);

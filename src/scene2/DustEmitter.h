@@ -27,7 +27,7 @@ public:
     float spawnRate = 22.0f;  // Particles per second 12
     float lastSpawnTime = 0.0f;
     bool isActive = true;
-    int maxParticles = 560; //change to 120
+    int maxParticles = 120; //change to 120
 
     // Spawn area (particles spawn randomly within this box) this main hall
     glm::vec3 spawnAreaMin = glm::vec3(-2.0f, 0.0f, -5.f);

@@ -6,7 +6,7 @@
 #include <shaders/diffuse_vert_glsl.h>
 #include <shaders/diffuse_frag_glsl.h>
 #include <fstream>
-#include <json.hpp>
+//#include <json.hpp>
 
 #include "Emitter.h"
 #include "scene.h"
@@ -59,7 +59,7 @@ private:
     scene.objects.push_back(man1); //Man with different texture
 
     auto woman = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/idle_animation.fbx");
-    woman->position = {9.0f, 0.0f, 0.0f};
+    woman->position = {1.0f, 0.0f, 0.0f};
     woman->rotation = {0.0f, 0.0f, 0.0f};
     woman->scale = {.011f, .011f, .011f};
     scene.objects.push_back(woman); //Woman
@@ -76,109 +76,111 @@ private:
     discoBall->scale = {1.2f, 1.2f, 1.2f};
     scene.objects.push_back(discoBall); //Disco ball
 
-    auto building = std::make_shared<Object>("models/building/scene.gltf");
-    building->position = {0.0f, 0.0f, 0.0f};
-    building->rotation = {0.0f, 0.0f, 0.0f};
-    building->scale = {1.0f, 1.0f, 1.0f};
+    scene.building = std::make_shared<Object>("models/building/scene.gltf");
+    scene.building->useNormalMapping = false;
+    danceFloor->setNormalMap(0, "models/building/textures/M_Floor_normal.png");
+    scene.building->position = {0.0f, 0.0f, 0.0f};
+    scene.building->rotation = {0.0f, 0.0f, 0.0f};
+    scene.building->scale = {1.0f, 1.0f, 1.0f};
 
-    building->setTransparentMeshes({"Glass", "Shot_Glass", "WineGlass",
+    scene.building->setTransparentMeshes({"Glass", "Shot_Glass", "WineGlass",
                                               "BeerBottle", "Large_Bottle", "Rectangle_Bottle",
                                               "Sphere_Bottle", "Tall_Skinny_Bottle"});
-    building->transparency = 3.f;
+    scene.building->transparency = 3.f;
 
-    scene.objects.push_back(building); //Main Building
+    scene.objects.push_back(scene.building); //Main Building
 
 
     //loading objects for collisions
     // auto buildingInfo = scene.readMeshCollisions("models/building/scene.gltf", "Floor1_M_Floor_0");
-    auto buildingInfo = building->getMesh()->getMeshBounds("Floor1_M_Floor_0");
-    auto floorColider = std::make_shared<Object>(building->getMesh(), "");
-    floorColider->position = building->position + (buildingInfo.center * building->scale);
+    auto buildingInfo = scene.building->getMesh()->getMeshBounds("Floor1_M_Floor_0");
+    auto floorColider = std::make_shared<Object>(scene.building->getMesh(), "");
+    floorColider->position = scene.building->position + (buildingInfo.center * scene.building->scale);
     floorColider->boxSize = buildingInfo.size;
-    floorColider->scale = building->scale;
+    floorColider->scale = scene.building->scale;
     floorColider->hasCollision = true;
     floorColider->shouldRender = false;
     scene.objects.push_back(floorColider);
 
-    auto barTop = building->getMesh()->getMeshBounds("Bar_1_M_BarTop_0");
-    auto barTopCollider = std::make_shared<Object>(building->getMesh(), "");
-    barTopCollider->position = building->position + (barTop.center * building->scale);
+    auto barTop = scene.building->getMesh()->getMeshBounds("Bar_1_M_BarTop_0");
+    auto barTopCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    barTopCollider->position = scene.building->position + (barTop.center * scene.building->scale);
     barTopCollider->boxSize = barTop.size;
-    barTopCollider->scale = building->scale;
+    barTopCollider->scale = scene.building->scale;
     barTopCollider->shouldRender = false;
     barTopCollider->hasCollision = true;
     scene.objects.push_back(barTopCollider);
 
-    auto batTop2 = building->getMesh()->getMeshBounds("Bar_2_M_BarTop_0");
-    auto barTopCollider2 = std::make_shared<Object>(building->getMesh(), "");
-    barTopCollider2->position = building->position + (batTop2.center * building->scale);
+    auto batTop2 = scene.building->getMesh()->getMeshBounds("Bar_2_M_BarTop_0");
+    auto barTopCollider2 = std::make_shared<Object>(scene.building->getMesh(), "");
+    barTopCollider2->position = scene.building->position + (batTop2.center * scene.building->scale);
     barTopCollider2->boxSize = batTop2.size;
-    barTopCollider2->scale = building->scale;
+    barTopCollider2->scale = scene.building->scale;
     barTopCollider2->shouldRender = false;
     barTopCollider2->hasCollision = true;
     scene.objects.push_back(barTopCollider2);
 
     //Bar_3_Short_M_BarTop_0
-    auto barTopCorner = building->getMesh()->getMeshBounds("Bar_Corner_M_BarTop_0");
-    auto barTopCornerCollider = std::make_shared<Object>(building->getMesh(), "");
-    barTopCornerCollider->position = building->position + (barTopCorner.center * building->scale);
+    auto barTopCorner = scene.building->getMesh()->getMeshBounds("Bar_Corner_M_BarTop_0");
+    auto barTopCornerCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    barTopCornerCollider->position = scene.building->position + (barTopCorner.center * scene.building->scale);
     barTopCornerCollider->boxSize = barTopCorner.size;
-    barTopCornerCollider->scale = building->scale;
+    barTopCornerCollider->scale = scene.building->scale;
     barTopCornerCollider->shouldRender = false;
     barTopCornerCollider->hasCollision = true;
     scene.objects.push_back(barTopCornerCollider);
 
-    auto barTopEnd = building->getMesh()->getMeshBounds("Bar_End_M_BarTop_0");
-    auto barTopEndCollider = std::make_shared<Object>(building->getMesh(), "");
-    barTopEndCollider->position = building->position + (barTopEnd.center * building->scale);
+    auto barTopEnd = scene.building->getMesh()->getMeshBounds("Bar_End_M_BarTop_0");
+    auto barTopEndCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    barTopEndCollider->position = scene.building->position + (barTopEnd.center * scene.building->scale);
     barTopEndCollider->boxSize = barTopEnd.size;
-    barTopEndCollider->scale = building->scale;
+    barTopEndCollider->scale = scene.building->scale;
     barTopEndCollider->shouldRender = false;
     barTopEndCollider->hasCollision = true;
     scene.objects.push_back(barTopEndCollider);
 
-    auto barGate = building->getMesh()->getMeshBounds("Bar_Gate_M_BarTop_0");
-    auto barGateCollider = std::make_shared<Object>(building->getMesh(), "");
-    barGateCollider->position = building->position + (barGate.center * building->scale);
+    auto barGate = scene.building->getMesh()->getMeshBounds("Bar_Gate_M_BarTop_0");
+    auto barGateCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    barGateCollider->position = scene.building->position + (barGate.center * scene.building->scale);
     barGateCollider->boxSize = barGate.size;
-    barGateCollider->scale = building->scale;
+    barGateCollider->scale = scene.building->scale;
     barGateCollider->shouldRender = false;
     barGateCollider->hasCollision = true;
     scene.objects.push_back(barGateCollider);
 
-    auto barShort = building->getMesh()->getMeshBounds("Bar_3_Short_M_BarTop_0");
-    auto barShortCollider = std::make_shared<Object>(building->getMesh(), "");
-    barShortCollider->position = building->position + (barShort.center * building->scale);
+    auto barShort = scene.building->getMesh()->getMeshBounds("Bar_3_Short_M_BarTop_0");
+    auto barShortCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    barShortCollider->position = scene.building->position + (barShort.center * scene.building->scale);
     barShortCollider->boxSize = barShort.size;
-    barShortCollider->scale = building->scale;
+    barShortCollider->scale = scene.building->scale;
     barShortCollider->shouldRender = false;
     barShortCollider->hasCollision = true;
     scene.objects.push_back(barShortCollider);
 
     // Table1_M_Table_0
-    auto table1 = building->getMesh()->getMeshBounds("Table1_M_Table_0");
-    auto table1Collider = std::make_shared<Object>(building->getMesh(), "");
-    table1Collider->position = building->position + (table1.center * building->scale);
+    auto table1 = scene.building->getMesh()->getMeshBounds("Table1_M_Table_0");
+    auto table1Collider = std::make_shared<Object>(scene.building->getMesh(), "");
+    table1Collider->position = scene.building->position + (table1.center * scene.building->scale);
     table1Collider->boxSize = table1.size;
-    table1Collider->scale = building->scale;
+    table1Collider->scale = scene.building->scale;
     table1Collider->shouldRender = false;
     table1Collider->hasCollision = true;
     scene.objects.push_back(table1Collider);
     // Table_M_Table_0
-    auto table2 = building->getMesh()->getMeshBounds("Table_M_Table_0");
-    auto table2Collider = std::make_shared<Object>(building->getMesh(), "");
-    table2Collider->position = building->position + (table2.center * building->scale);
+    auto table2 = scene.building->getMesh()->getMeshBounds("Table_M_Table_0");
+    auto table2Collider = std::make_shared<Object>(scene.building->getMesh(), "");
+    table2Collider->position = scene.building->position + (table2.center * scene.building->scale);
     table2Collider->boxSize = table2.size;
-    table2Collider->scale = building->scale;
+    table2Collider->scale = scene.building->scale;
     table2Collider->shouldRender = false;
     table2Collider->hasCollision = true;
     scene.objects.push_back(table2Collider);
     // Steps_M_DJControlerandPainting_0
-    auto djSteps = building->getMesh()->getMeshBounds("Steps_M_DJControlerandPainting_0");
-    auto djStepsCollider = std::make_shared<Object>(building->getMesh(), "");
-    djStepsCollider->position = building->position + (djSteps.center * building->scale);
+    auto djSteps = scene.building->getMesh()->getMeshBounds("Steps_M_DJControlerandPainting_0");
+    auto djStepsCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    djStepsCollider->position = scene.building->position + (djSteps.center * scene.building->scale);
     djStepsCollider->boxSize = djSteps.size;
-    djStepsCollider->scale = building->scale;
+    djStepsCollider->scale = scene.building->scale;
     djStepsCollider->shouldRender = false;
     djStepsCollider->hasCollision = true;
     scene.objects.push_back(djStepsCollider);
@@ -190,151 +192,151 @@ private:
     // Steps5_M_DJControlerandPainting_0
 
     // Curved_Bench_4_M_BenchEnd_0
-    auto curvedBench4End = building->getMesh()->getMeshBounds("Curved_Bench_4_M_BenchEnd_0");
-    auto curvedBench4EndCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench4EndCollider->position = building->position + (curvedBench4End.center * building->scale);
+    auto curvedBench4End = scene.building->getMesh()->getMeshBounds("Curved_Bench_4_M_BenchEnd_0");
+    auto curvedBench4EndCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench4EndCollider->position = scene.building->position + (curvedBench4End.center * scene.building->scale);
     curvedBench4EndCollider->boxSize = curvedBench4End.size;
-    curvedBench4EndCollider->scale = building->scale;
+    curvedBench4EndCollider->scale = scene.building->scale;
     curvedBench4EndCollider->shouldRender = false;
     curvedBench4EndCollider->hasCollision = true;
     scene.objects.push_back(curvedBench4EndCollider);
     // Curved_Bench_4_M_BenchSeatandPicture_0
-    auto curvedBench4Seat = building->getMesh()->getMeshBounds("Curved_Bench_4_M_BenchSeatandPicture_0");
-    auto curvedBench4SeatCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench4SeatCollider->position = building->position + (curvedBench4Seat.center * building->scale);
+    auto curvedBench4Seat = scene.building->getMesh()->getMeshBounds("Curved_Bench_4_M_BenchSeatandPicture_0");
+    auto curvedBench4SeatCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench4SeatCollider->position = scene.building->position + (curvedBench4Seat.center * scene.building->scale);
     curvedBench4SeatCollider->boxSize = curvedBench4Seat.size;
-    curvedBench4SeatCollider->scale = building->scale;
+    curvedBench4SeatCollider->scale = scene.building->scale;
     curvedBench4SeatCollider->shouldRender = false;
     curvedBench4SeatCollider->hasCollision = true;
     scene.objects.push_back(curvedBench4SeatCollider);
     // Curved_Bench_4_M_BenchLowerandBack_0
-    auto curvedBench4Back = building->getMesh()->getMeshBounds("Curved_Bench_4_M_BenchLowerandBack_0");
-    auto curvedBench4BackCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench4BackCollider->position = building->position + (curvedBench4Back.center * building->scale);
+    auto curvedBench4Back = scene.building->getMesh()->getMeshBounds("Curved_Bench_4_M_BenchLowerandBack_0");
+    auto curvedBench4BackCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench4BackCollider->position = scene.building->position + (curvedBench4Back.center * scene.building->scale);
     curvedBench4BackCollider->boxSize = curvedBench4Back.size;
-    curvedBench4BackCollider->scale = building->scale;
+    curvedBench4BackCollider->scale = scene.building->scale;
     curvedBench4BackCollider->shouldRender = false;
     curvedBench4BackCollider->hasCollision = true;
     scene.objects.push_back(curvedBench4BackCollider);
 
     // Curved_Bench_5_M_BenchEnd_0
-    auto curvedBench5End = building->getMesh()->getMeshBounds("Curved_Bench_5_M_BenchEnd_0");
-    auto curvedBench5EndCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench5EndCollider->position = building->position + (curvedBench5End.center * building->scale);
+    auto curvedBench5End = scene.building->getMesh()->getMeshBounds("Curved_Bench_5_M_BenchEnd_0");
+    auto curvedBench5EndCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench5EndCollider->position = scene.building->position + (curvedBench5End.center * scene.building->scale);
     curvedBench5EndCollider->boxSize = curvedBench5End.size;
-    curvedBench5EndCollider->scale = building->scale;
+    curvedBench5EndCollider->scale = scene.building->scale;
     curvedBench5EndCollider->shouldRender = false;
     curvedBench5EndCollider->hasCollision = true;
     scene.objects.push_back(curvedBench5EndCollider);
     // Curved_Bench_5_M_BenchSeatandPicture_0
-    auto curvedBench5Seat = building->getMesh()->getMeshBounds("Curved_Bench_5_M_BenchSeatandPicture_0");
-    auto curvedBench5SeatCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench5SeatCollider->position = building->position + (curvedBench5Seat.center * building->scale);
+    auto curvedBench5Seat = scene.building->getMesh()->getMeshBounds("Curved_Bench_5_M_BenchSeatandPicture_0");
+    auto curvedBench5SeatCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench5SeatCollider->position = scene.building->position + (curvedBench5Seat.center * scene.building->scale);
     curvedBench5SeatCollider->boxSize = curvedBench5Seat.size;
-    curvedBench5SeatCollider->scale = building->scale;
+    curvedBench5SeatCollider->scale = scene.building->scale;
     curvedBench5SeatCollider->shouldRender = false;
     curvedBench5SeatCollider->hasCollision = true;
     scene.objects.push_back(curvedBench5SeatCollider);
     // Curved_Bench_5_M_BenchLowerandBack_0
-    auto curvedBench5Back = building->getMesh()->getMeshBounds("Curved_Bench_5_M_BenchLowerandBack_0");
-    auto curvedBench5BackCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench5BackCollider->position = building->position + (curvedBench5Back.center * building->scale);
+    auto curvedBench5Back = scene.building->getMesh()->getMeshBounds("Curved_Bench_5_M_BenchLowerandBack_0");
+    auto curvedBench5BackCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench5BackCollider->position = scene.building->position + (curvedBench5Back.center * scene.building->scale);
     curvedBench5BackCollider->boxSize = curvedBench5Back.size;
-    curvedBench5BackCollider->scale = building->scale;
+    curvedBench5BackCollider->scale = scene.building->scale;
     curvedBench5BackCollider->shouldRender = false;
     curvedBench5BackCollider->hasCollision = true;
     scene.objects.push_back(curvedBench5BackCollider);
 
     // Curved_Bench_9_M_BenchEnd_0
-    auto curvedBench9End = building->getMesh()->getMeshBounds("Curved_Bench_9_M_BenchEnd_0");
-    auto curvedBench9EndCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench9EndCollider->position = building->position + (curvedBench9End.center * building->scale);
+    auto curvedBench9End = scene.building->getMesh()->getMeshBounds("Curved_Bench_9_M_BenchEnd_0");
+    auto curvedBench9EndCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench9EndCollider->position = scene.building->position + (curvedBench9End.center * scene.building->scale);
     curvedBench9EndCollider->boxSize = curvedBench9End.size;
-    curvedBench9EndCollider->scale = building->scale;
+    curvedBench9EndCollider->scale = scene.building->scale;
     curvedBench9EndCollider->shouldRender = false;
     curvedBench9EndCollider->hasCollision = true;
     scene.objects.push_back(curvedBench9EndCollider);
     // Curved_Bench_9_M_BenchSeatandPicture_0
-    auto curvedBench9Seat = building->getMesh()->getMeshBounds("Curved_Bench_9_M_BenchSeatandPicture_0");
-    auto curvedBench9SeatCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench9SeatCollider->position = building->position + (curvedBench9Seat.center * building->scale);
+    auto curvedBench9Seat = scene.building->getMesh()->getMeshBounds("Curved_Bench_9_M_BenchSeatandPicture_0");
+    auto curvedBench9SeatCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench9SeatCollider->position = scene.building->position + (curvedBench9Seat.center * scene.building->scale);
     curvedBench9SeatCollider->boxSize = curvedBench9Seat.size;
-    curvedBench9SeatCollider->scale = building->scale;
+    curvedBench9SeatCollider->scale = scene.building->scale;
     curvedBench9SeatCollider->shouldRender = false;
     curvedBench9SeatCollider->hasCollision = true;
     scene.objects.push_back(curvedBench9SeatCollider);
     // Curved_Bench_9_M_BenchLowerandBack_0
-    auto curvedBench9Back = building->getMesh()->getMeshBounds("Curved_Bench_9_M_BenchLowerandBack_0");
-    auto curvedBench9BackCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench9BackCollider->position = building->position + (curvedBench9Back.center * building->scale);
+    auto curvedBench9Back = scene.building->getMesh()->getMeshBounds("Curved_Bench_9_M_BenchLowerandBack_0");
+    auto curvedBench9BackCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench9BackCollider->position = scene.building->position + (curvedBench9Back.center * scene.building->scale);
     curvedBench9BackCollider->boxSize = curvedBench9Back.size;
-    curvedBench9BackCollider->scale = building->scale;
+    curvedBench9BackCollider->scale = scene.building->scale;
     curvedBench9BackCollider->shouldRender = false;
     curvedBench9BackCollider->hasCollision = true;
     scene.objects.push_back(curvedBench9BackCollider);
 
     // Curved_Bench_8_M_BenchEnd_0
-    auto curvedBench8End = building->getMesh()->getMeshBounds("Curved_Bench_8_M_BenchEnd_0");
-    auto curvedBench8EndCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench8EndCollider->position = building->position + (curvedBench8End.center * building->scale);
+    auto curvedBench8End = scene.building->getMesh()->getMeshBounds("Curved_Bench_8_M_BenchEnd_0");
+    auto curvedBench8EndCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench8EndCollider->position = scene.building->position + (curvedBench8End.center * scene.building->scale);
     curvedBench8EndCollider->boxSize = curvedBench8End.size;
-    curvedBench8EndCollider->scale = building->scale;
+    curvedBench8EndCollider->scale = scene.building->scale;
     curvedBench8EndCollider->shouldRender = false;
     curvedBench8EndCollider->hasCollision = true;
     scene.objects.push_back(curvedBench8EndCollider);
     // Curved_Bench_8_M_BenchSeatandPicture_0
-    auto curvedBench8Seat = building->getMesh()->getMeshBounds("Curved_Bench_8_M_BenchSeatandPicture_0");
-    auto curvedBench8SeatCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench8SeatCollider->position = building->position + (curvedBench8Seat.center * building->scale);
+    auto curvedBench8Seat = scene.building->getMesh()->getMeshBounds("Curved_Bench_8_M_BenchSeatandPicture_0");
+    auto curvedBench8SeatCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench8SeatCollider->position = scene.building->position + (curvedBench8Seat.center * scene.building->scale);
     curvedBench8SeatCollider->boxSize = curvedBench8Seat.size;
-    curvedBench8SeatCollider->scale = building->scale;
+    curvedBench8SeatCollider->scale = scene.building->scale;
     curvedBench8SeatCollider->shouldRender = false;
     curvedBench8SeatCollider->hasCollision = true;
     scene.objects.push_back(curvedBench8SeatCollider);
     // Curved_Bench_8_M_BenchLowerandBack_0
-    auto curvedBench8Back = building->getMesh()->getMeshBounds("Curved_Bench_8_M_BenchLowerandBack_0");
-    auto curvedBench8BackCollider = std::make_shared<Object>(building->getMesh(), "");
-    curvedBench8BackCollider->position = building->position + (curvedBench8Back.center * building->scale);
+    auto curvedBench8Back = scene.building->getMesh()->getMeshBounds("Curved_Bench_8_M_BenchLowerandBack_0");
+    auto curvedBench8BackCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    curvedBench8BackCollider->position = scene.building->position + (curvedBench8Back.center * scene.building->scale);
     curvedBench8BackCollider->boxSize = curvedBench8Back.size;
-    curvedBench8BackCollider->scale = building->scale;
+    curvedBench8BackCollider->scale = scene.building->scale;
     curvedBench8BackCollider->shouldRender = false;
     curvedBench8BackCollider->hasCollision = true;
     scene.objects.push_back(curvedBench8BackCollider);
 
     // Large_Speaker_M_LargeSpeakerandGlasses_0
-    auto largeSpeaker = building->getMesh()->getMeshBounds("Large_Speaker_M_LargeSpeakerandGlasses_0");
-    auto largeSpeakerCollider = std::make_shared<Object>(building->getMesh(), "");
-    largeSpeakerCollider->position = building->position + (largeSpeaker.center * building->scale);
+    auto largeSpeaker = scene.building->getMesh()->getMeshBounds("Large_Speaker_M_LargeSpeakerandGlasses_0");
+    auto largeSpeakerCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    largeSpeakerCollider->position = scene.building->position + (largeSpeaker.center * scene.building->scale);
     largeSpeakerCollider->boxSize = largeSpeaker.size;
-    largeSpeakerCollider->scale = building->scale;
+    largeSpeakerCollider->scale = scene.building->scale;
     largeSpeakerCollider->shouldRender = false;
     largeSpeakerCollider->hasCollision = true;
     scene.objects.push_back(largeSpeakerCollider);
     // Large_Speaker1_M_LargeSpeakerandGlasses_0
-    auto largeSpeaker1 = building->getMesh()->getMeshBounds("Large_Speaker1_M_LargeSpeakerandGlasses_0");
-    auto largeSpeaker1Collider = std::make_shared<Object>(building->getMesh(), "");
-    largeSpeaker1Collider->position = building->position + (largeSpeaker1.center * building->scale);
+    auto largeSpeaker1 = scene.building->getMesh()->getMeshBounds("Large_Speaker1_M_LargeSpeakerandGlasses_0");
+    auto largeSpeaker1Collider = std::make_shared<Object>(scene.building->getMesh(), "");
+    largeSpeaker1Collider->position = scene.building->position + (largeSpeaker1.center * scene.building->scale);
     largeSpeaker1Collider->boxSize = largeSpeaker1.size;
-    largeSpeaker1Collider->scale = building->scale;
+    largeSpeaker1Collider->scale = scene.building->scale;
     largeSpeaker1Collider->shouldRender = false;
     largeSpeaker1Collider->hasCollision = true;
     scene.objects.push_back(largeSpeaker1Collider);
 
     // DJ_Stand_M_DJStandLower_0
-    auto djStand = building->getMesh()->getMeshBounds("DJ_Stand_M_DJStandLower_0");
-    auto djStandCollider = std::make_shared<Object>(building->getMesh(), "");
-    djStandCollider->position = building->position + (djStand.center * building->scale);
+    auto djStand = scene.building->getMesh()->getMeshBounds("DJ_Stand_M_DJStandLower_0");
+    auto djStandCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    djStandCollider->position = scene.building->position + (djStand.center * scene.building->scale);
     djStandCollider->boxSize = djStand.size;
-    djStandCollider->scale = building->scale;
+    djStandCollider->scale = scene.building->scale;
     djStandCollider->shouldRender = false;
     djStandCollider->hasCollision = true;
     scene.objects.push_back(djStandCollider);
     // DJ_Stand_M_DJstandUpper_0
-    auto djStandUpper = building->getMesh()->getMeshBounds("DJ_Stand_M_DJstandUpper_0");
-    auto djStandUpperCollider = std::make_shared<Object>(building->getMesh(), "");
-    djStandUpperCollider->position = building->position + (djStandUpper.center * building->scale);
+    auto djStandUpper = scene.building->getMesh()->getMeshBounds("DJ_Stand_M_DJstandUpper_0");
+    auto djStandUpperCollider = std::make_shared<Object>(scene.building->getMesh(), "");
+    djStandUpperCollider->position = scene.building->position + (djStandUpper.center * scene.building->scale);
     djStandUpperCollider->boxSize = djStandUpper.size;
-    djStandUpperCollider->scale = building->scale;
+    djStandUpperCollider->scale = scene.building->scale;
     djStandUpperCollider->shouldRender = false;
     djStandUpperCollider->hasCollision = true;
     scene.objects.push_back(djStandUpperCollider);
@@ -392,6 +394,8 @@ private:
     scene.camera = move(camera);
 
     loadObjects();
+
+    scene.setupLighting();
   }
 
   static void windowSizeCallback(GLFWwindow* window, int width, int height) {

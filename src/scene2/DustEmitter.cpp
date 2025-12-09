@@ -24,7 +24,7 @@ void DustEmitter::update(Scene &scene, float dt) {
         float spawnInterval = 1.0f / spawnRate;
 
         while (lastSpawnTime >= spawnInterval && particles.size() < maxParticles) {
-            // ✅ Create particle with cached texture
+            //Create particle with cached texture
             auto particle = std::make_unique<DustParticle>(particleMesh, particleTexture);
 
             // Random position within spawn area

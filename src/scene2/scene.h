@@ -8,6 +8,7 @@
 #include "object.h"
 #include "camera.h"
 #include "grid.h"
+#include "lighting.h"
 
 class Scene {
 public:
@@ -16,6 +17,18 @@ public:
 
   void render();
   void renderGrid();
+
+  Material defaultMaterial;
+  DirectionalLight directionalLight;
+  std::vector<PointLight> pointLights;
+  std::vector<SpotLight> spotLights;
+  std::shared_ptr<Object> building; // needed for referencing building for light positions
+
+  bool useDirLight = true;
+  bool useBlinnPhong = true;
+
+  void setupLighting();
+  void updateLights(float dt);
 
   std::unique_ptr<Camera> camera;
 

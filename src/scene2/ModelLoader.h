@@ -7,14 +7,26 @@
 
 class ModelLoader {
 public:
+    struct MaterialTextures {
+        std::shared_ptr<ppgso::Texture> diffuse;
+        std::shared_ptr<ppgso::Texture> normal;
+        std::shared_ptr<ppgso::Texture> specular;
+    };
+
     // Load textures for a mesh based on its material information
-    static std::map<unsigned int, std::shared_ptr<ppgso::Texture>> loadTextures(
-        const ppgso::Mesh_Assimp* mesh);
+    static std::map<unsigned int, MaterialTextures> loadAllTextures(const ppgso::Mesh_Assimp* mesh);
+
+    // Load textures (backwards compatibility)
+    static std::map<unsigned int, std::shared_ptr<ppgso::Texture>> loadTextures(const ppgso::Mesh_Assimp* mesh);
     
     // Load a single texture file
     static std::shared_ptr<ppgso::Texture> loadTextureFile(const std::string& path);
     // Create a default placeholder texture
     static std::unique_ptr<ppgso::Texture> createWhiteTexture();
+
+    static std::unique_ptr<ppgso::Texture> createDefaultNormalMap();
+
+    static std::string findNormalMapByName(const std::string& diffusePath, const std::string& baseDir);
 
 private:
     // Load image using stb_image

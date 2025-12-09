@@ -97,6 +97,10 @@ set(PPGSO_SHADER_SRC
         shader/diffuse_vert.glsl shader/diffuse_frag.glsl
         shader/texture_vert.glsl shader/texture_frag.glsl
         shader/animated_vert.glsl shader/diffuse_frag.glsl
+        shader/grayscale_vert.glsl shader/grayscale_frag.glsl
+        shader/blur_frag.glsl
+        shader/bloom_ext_frag.glsl
+        shader/bloom_comb_frag.glsl
 )
 add_resources(shaders ${PPGSO_SHADER_SRC})
 
@@ -195,6 +199,9 @@ add_executable(scene2
         src/scene2/DustParticle.h
         src/scene2/DustEmitter.cpp
         src/scene2/DustEmitter.h
+        src/scene2/lighting.h
+        src/scene2/PostProcessing.cpp
+        src/scene2/PostProcessing.h
 )
 target_link_libraries(scene2 ppgso shaders)
 install (TARGETS scene2 DESTINATION .)

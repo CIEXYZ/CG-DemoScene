@@ -17,7 +17,7 @@ ppgso::Mesh_Assimp::Mesh_Assimp(const std::string &obj_file) {
     basePath = getParentPath(obj_file);
 
     // Load the scene - importer is now a member so scene stays valid
-    scene = importer.ReadFile(obj_file, aiProcess_Triangulate | aiProcess_FlipUVs);
+    scene = importer.ReadFile(obj_file, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::stringstream msg;
@@ -64,13 +64,6 @@ ppgso::Mesh_Assimp::Mesh_Assimp(const std::string &obj_file) {
             aiString texPath;
             material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath);
             std::cout << "  Diffuse texture: " << texPath.C_Str() << std::endl;
-        }
-
-        // Normal texture
-        if (material->GetTextureCount(aiTextureType_NORMALS) > 0) {
-            aiString texPath;
-            material->GetTexture(aiTextureType_NORMALS, 0, &texPath);
-            std::cout << "  Normal texture: " << texPath.C_Str() << std::endl;
         }
 
         // Specular texture
@@ -196,6 +189,40 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
 
+    // Process tangents
+    if (mesh->HasTangentsAndBitangents()) {
+        std::vector<glm::vec3> tangents;
+        std::vector<glm::vec3> bitangents;
+        tangents.reserve(mesh->mNumVertices);
+        bitangents.reserve(mesh->mNumVertices);
+
+        glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(transform)));
+
+        for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+            glm::vec3 tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+            glm::vec3 bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+
+            tangents.push_back(glm::normalize(normalMatrix * tangent));
+            bitangents.push_back(glm::normalize(normalMatrix * bitangent));
+        }
+
+        // Upload tangents
+        GLuint tbo;
+        glGenBuffers(1, &tbo);
+        glBindBuffer(GL_ARRAY_BUFFER, tbo);
+        glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(glm::vec3), tangents.data(), GL_STATIC_DRAW);
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        // Upload bitangents
+        GLuint bbo;
+        glGenBuffers(1, &bbo);
+        glBindBuffer(GL_ARRAY_BUFFER, bbo);
+        glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(glm::vec3), bitangents.data(), GL_STATIC_DRAW);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    }
+
     // Process indices
     if (mesh->HasFaces()) {
         std::vector<unsigned int> indices;
@@ -227,94 +254,6 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
     //           << "max(" << max.x << ", " << max.y << ", " << max.z << ")" << std::endl;
 }
 
-// void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
-//     gl_buffer buffer;
-//
-//     // Store material index and mesh name for this mesh
-//     buffer.materialIndex = mesh->mMaterialIndex;
-//     buffer.meshIndex = 0;
-//     buffer.meshName = mesh->mName.C_Str();
-//
-//     std::cout << "Processing mesh: '" << buffer.meshName << "' with material index: " << buffer.materialIndex << std::endl;
-//
-//     // Process vertices
-//     if (mesh->HasPositions()) {
-//         // Generate a vertex array object
-//         glGenVertexArrays(1, &buffer.vao);
-//         glBindVertexArray(buffer.vao);
-//
-//         std::vector<glm::vec3> transformedVertices;
-//         transformedVertices.reserve(mesh->mNumVertices);
-//
-//         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-//             glm::vec4 vertex = glm::vec4(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z, 1.0f);
-//             glm::vec4 transformedVertex = transform * vertex;
-//             transformedVertices.push_back(glm::vec3(transformedVertex));
-//         }
-//
-//         // Extract vertex positions from aiMesh and upload to GPU
-//         glGenBuffers(1, &buffer.vbo);
-//         glBindBuffer(GL_ARRAY_BUFFER, buffer.vbo);
-//         glBufferData(GL_ARRAY_BUFFER, transformedVertices.size() * sizeof(glm::vec3), transformedVertices.data(), GL_STATIC_DRAW);
-//         // Enable and set up vertex attribute pointer for positions
-//         glEnableVertexAttribArray(0);
-//         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-//     }
-//
-//     // Process texture coordinates
-//     if (mesh->HasTextureCoords(0)) {
-//         std::vector<aiVector2D> textureCoords;
-//         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-//             aiVector3D texCoord = mesh->mTextureCoords[0][i]; // Assuming single texture channel (index 0)
-//             textureCoords.push_back(aiVector2D(texCoord.x, texCoord.y));
-//         }
-//         glGenBuffers(1, &buffer.tbo);
-//         glBindBuffer(GL_ARRAY_BUFFER, buffer.tbo);
-//         glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(aiVector2D), textureCoords.data(), GL_STATIC_DRAW);
-//
-//         glEnableVertexAttribArray(1);
-//         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-//     }
-//
-//     // Process normals
-//     if (mesh->HasNormals()) {
-//         std::vector<glm::vec3> transformedNormals;
-//         transformedNormals.reserve(mesh->mNumVertices);
-//
-//         glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(transform)));
-//
-//         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-//             glm::vec3 normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-//             glm::vec3 transformedNormal = glm::normalize(normalMatrix * normal);
-//             transformedNormals.push_back(transformedNormal);
-//         }
-//
-//         glGenBuffers(1, &buffer.nbo);
-//         glBindBuffer(GL_ARRAY_BUFFER, buffer.nbo);
-//         glBufferData(GL_ARRAY_BUFFER, transformedNormals.size() * sizeof(glm::vec3), transformedNormals.data(), GL_STATIC_DRAW);
-//
-//         glEnableVertexAttribArray(2);
-//         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-//     }
-//
-//     // Process indices
-//     if (mesh->HasFaces()) {
-//         std::vector<unsigned int> indices;
-//         for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
-//             aiFace face = mesh->mFaces[i];
-//             for (unsigned int j = 0; j < face.mNumIndices; ++j) {
-//                 indices.push_back(face.mIndices[j]);
-//             }
-//         }
-//
-//         // Upload indices to GPU
-//         glGenBuffers(1, &buffer.ibo);
-//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.ibo);
-//         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-//         buffer.size = static_cast<GLsizei>(indices.size());
-//     }
-//     buffers.push_back(buffer);
-// }
 
 void ppgso::Mesh_Assimp::render() {
     for (auto &buffer : buffers) {
