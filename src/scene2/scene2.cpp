@@ -6,7 +6,6 @@
 #include <shaders/diffuse_vert_glsl.h>
 #include <shaders/diffuse_frag_glsl.h>
 #include <fstream>
-//#include <json.hpp>
 
 #include "Emitter.h"
 #include "scene.h"
@@ -16,6 +15,7 @@
 #include "PersonObject.h"
 #include "Timeline.h"
 #include "Crowd.h"
+#include "Skybox.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -473,6 +473,17 @@ private:
     scene.allowManualCamera = true;
 
     scene.setupLighting();
+
+    // Load cubemap
+    std::vector<std::string> faces{
+      "models/skybox/posx.png",
+      "models/skybox/negx.png",
+      "models/skybox/posy.png",
+      "models/skybox/negy.png",
+      "models/skybox/posz.png",
+      "models/skybox/negz.png"
+   };
+    scene.skybox = std::make_unique<Skybox>(faces);
   }
 
   static void windowSizeCallback(GLFWwindow* window, int width, int height) {
@@ -548,9 +559,9 @@ private:
     scene.timeline->addEvent(new CameraMovementEvent(
       0.0f,
       glm::vec3(0.0f, 1.2f, 6.0f),  // Position
-      glm::vec3(0.0f, 1.2f, 6.0f),  // Catmull-Rom point
-      glm::vec3(0.0f, 1.2f, 6.0f), // Catmull-Rom point
-      glm::vec3(-90.0f, -5.0f, 0.0f), // Rotation (yaw, pitch, roll)
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(-90.0f, -20.0f, 0.0f), // Rotation (yaw, pitch, roll)
       0.0f,
       "Init scene;"
     ));
@@ -683,6 +694,56 @@ private:
       glm::vec3(0.0f, 50.0f, 0.0f),
       0.0f,
       "Perspective on dancefloor;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      55.0f,
+      glm::vec3(0.0f, 1.8f, 3.0f),  // Position
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(-90.0f, -20.0f, 0.0f),
+      0.0f,
+      "Camera 1;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      75.0f,
+      glm::vec3(-2.9f, 1.4f, 2.9f),  // Position
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(-0.2f, -50.0f, -12.0f),
+      0.0f,
+      "Camera 2;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      95.0f,
+      glm::vec3(3.4f, 0.85, 2.5f),  // Position
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(0.0f, -156.0f, 1.0f),
+      0.0f,
+      "Camera 3;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      115.0f,
+      glm::vec3(0.1f, 2.3f, 0.5f),  // Position
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(-0.9f, 90.0f, -58.0f),
+      0.0f,
+      "Camera 4;"
+    ));
+
+    scene.timeline->addEvent(new CameraMovementEvent(
+      135.0f,
+      glm::vec3(0.0f, 2.6f, -0.2f),  // Position
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(0.0f, 1.2f, 6.0f),
+      glm::vec3(0.0f, -90.0f, -11.0f),
+      0.0f,
+      "Camera 5;"
     ));
 
     //Man1 timeline
@@ -1083,6 +1144,8 @@ public:
 
     glClearColor(.2f, .2f, .2f, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    scene.skybox->render(scene.camera->viewMatrix, scene.camera->projectionMatrix);
 
     scene.update(dt);
     scene.render();

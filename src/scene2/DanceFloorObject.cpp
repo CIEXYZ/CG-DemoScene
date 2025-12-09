@@ -9,7 +9,7 @@
 
 DanceFloorObject::DanceFloorObject() {
     shader = std::make_unique<ppgso::Shader>(diffuse_vert_glsl, diffuse_frag_glsl);
-    texture = ModelLoader::createWhiteTexture();
+    texture = ModelLoader::loadTextureFile("models/disco_ball/textures/dancefloor_texture.png");
 
     init();
     initGrid();
@@ -239,6 +239,24 @@ void DanceFloorObject::update(Scene &scene, float dt) {
             }
         }
     }
+
+    glm::vec3 blueTint = glm::vec3(0.0f, 0.0f, 1.0f);   // Orange
+    float maxDistance = 2.0f; // Maximum distance for color transition
+
+    for (int x = 0; x < GRID_SIZE; x++) {
+        for (int z = 0; z < GRID_SIZE; z++) {
+            // Calculate world position of this tile
+            glm::vec3 tileWorldPos = glm::vec3(modelMatrix * glm::vec4(gridCubes[x][z].position, 1.0f));
+
+            // Calculate distance from camera to tile
+            float distance = glm::length(scene.camera->position - tileWorldPos);
+
+            float normalizedDistance = glm::clamp(distance / maxDistance, 0.0f, 1.0f);
+
+            // Mix the random color with orange based on camera distance
+            cubeColors[x][z] = glm::mix(blueTint, cubeColors[x][z], normalizedDistance);
+        }
+    }
 }
 
 void DanceFloorObject::render(Scene &scene) {
@@ -266,32 +284,67 @@ void DanceFloorObject::render(Scene &scene) {
         shader->setUniform("dirLight.diffuse", scene.directionalLight.diffuse);
         shader->setUniform("dirLight.specular", scene.directionalLight.specular);
     }
+
     //POINT
-    shader->setUniform("numPointLights", (int)scene.pointLights.size());
-    for (size_t i = 0; i < scene.pointLights.size() && i < 10; i++) {
-        std::string base = "pointLights[" + std::to_string(i) + "]";
-        shader->setUniform(base + ".position", scene.pointLights[i].position);
-        shader->setUniform(base + ".ambient", scene.pointLights[i].ambient);
-        shader->setUniform(base + ".diffuse", scene.pointLights[i].diffuse);
-        shader->setUniform(base + ".specular", scene.pointLights[i].specular);
-        shader->setUniform(base + ".constant", scene.pointLights[i].constant);
-        shader->setUniform(base + ".linear", scene.pointLights[i].linear);
-        shader->setUniform(base + ".quadratic", scene.pointLights[i].quadratic);
+    shader->setUniform("usePointLight", scene.usePointLight);
+    if (scene.usePointLight) {
+        shader->setUniform("pointRedLight.position", scene.redLight.position);
+        shader->setUniform("pointRedLight.ambient", scene.redLight.ambient);
+        shader->setUniform("pointRedLight.diffuse", scene.redLight.diffuse);
+        shader->setUniform("pointRedLight.specular", scene.redLight.specular);
+        shader->setUniform("pointRedLight.constant", scene.redLight.constant);
+        shader->setUniform("pointRedLight.linear", scene.redLight.linear);
+        shader->setUniform("pointRedLight.quadratic", scene.redLight.quadratic);
+
+        shader->setUniform("pointGreenLight.position", scene.greenLight.position);
+        shader->setUniform("pointGreenLight.ambient", scene.greenLight.ambient);
+        shader->setUniform("pointGreenLight.diffuse", scene.greenLight.diffuse);
+        shader->setUniform("pointGreenLight.specular", scene.greenLight.specular);
+        shader->setUniform("pointGreenLight.constant", scene.greenLight.constant);
+        shader->setUniform("pointGreenLight.linear", scene.greenLight.linear);
+        shader->setUniform("pointGreenLight.quadratic", scene.greenLight.quadratic);
+
+        shader->setUniform("pointBlueLight.position", scene.blueLight.position);
+        shader->setUniform("pointBlueLight.ambient", scene.blueLight.ambient);
+        shader->setUniform("pointBlueLight.diffuse", scene.blueLight.diffuse);
+        shader->setUniform("pointBlueLight.specular", scene.blueLight.specular);
+        shader->setUniform("pointBlueLight.constant", scene.blueLight.constant);
+        shader->setUniform("pointBlueLight.linear", scene.blueLight.linear);
+        shader->setUniform("pointBlueLight.quadratic", scene.blueLight.quadratic);
+
+        shader->setUniform("pointCeilingLight.position", scene.ceilingLight.position);
+        shader->setUniform("pointCeilingLight.ambient", scene.ceilingLight.ambient);
+        shader->setUniform("pointCeilingLight.diffuse", scene.ceilingLight.diffuse);
+        shader->setUniform("pointCeilingLight.specular", scene.ceilingLight.specular);
+        shader->setUniform("pointCeilingLight.constant", scene.ceilingLight.constant);
+        shader->setUniform("pointCeilingLight.linear", scene.ceilingLight.linear);
+        shader->setUniform("pointCeilingLight.quadratic", scene.ceilingLight.quadratic);
     }
 
     //SPOTLIGHTS
-    shader->setUniform("numSpotLights", (int)scene.spotLights.size());
-    for (size_t i = 0; i < scene.spotLights.size() && i < 5; i++) {
-        std::string base = "spotLights[" + std::to_string(i) + "]";
-        shader->setUniform(base + ".position", scene.spotLights[i].position);
-        shader->setUniform(base + ".direction", scene.spotLights[i].direction);
-        shader->setUniform(base + ".ambient", scene.spotLights[i].ambient);
-        shader->setUniform(base + ".diffuse", scene.spotLights[i].diffuse);
-        shader->setUniform(base + ".specular", scene.spotLights[i].specular);
-        shader->setUniform(base + ".cutOff", scene.spotLights[i].cutOff);
-        shader->setUniform(base + ".outerCutOff", scene.spotLights[i].outerCutOff);
-        shader->setUniform(base + ".constant", scene.spotLights[i].constant);
-        shader->setUniform(base + ".linear", scene.spotLights[i].linear);
+    shader->setUniform("useSpotLight", scene.useSpotLight);
+    if (scene.useSpotLight) {
+        shader->setUniform("spotDJLights.position", scene.djSpot.position);
+        shader->setUniform("spotDJLights.direction", scene.djSpot.direction);
+        shader->setUniform("spotDJLights.ambient", scene.djSpot.ambient);
+        shader->setUniform("spotDJLights.diffuse", scene.djSpot.diffuse);
+        shader->setUniform("spotDJLights.specular", scene.djSpot.specular);
+        shader->setUniform("spotDJLights.cutOff", scene.djSpot.cutOff);
+        shader->setUniform("spotDJLights.outerCutOff", scene.djSpot.outerCutOff);
+        shader->setUniform("spotDJLights.constant", scene.djSpot.constant);
+        shader->setUniform("spotDJLights.linear", scene.djSpot.linear);
+        shader->setUniform("spotDJLights.quadratic", scene.djSpot.quadratic);
+
+        shader->setUniform("spotDanceLights.position", scene.danceSpot.position);
+        shader->setUniform("spotDanceLights.direction", scene.danceSpot.direction);
+        shader->setUniform("spotDanceLights.ambient", scene.danceSpot.ambient);
+        shader->setUniform("spotDanceLights.diffuse", scene.danceSpot.diffuse);
+        shader->setUniform("spotDanceLights.specular", scene.danceSpot.specular);
+        shader->setUniform("spotDanceLights.cutOff", scene.danceSpot.cutOff);
+        shader->setUniform("spotDanceLights.outerCutOff", scene.danceSpot.outerCutOff);
+        shader->setUniform("spotDanceLights.constant", scene.danceSpot.constant);
+        shader->setUniform("spotDanceLights.linear", scene.danceSpot.linear);
+        shader->setUniform("spotDanceLights.quadratic", scene.danceSpot.quadratic);
     }
 
      //LIGHTING OPTIONS

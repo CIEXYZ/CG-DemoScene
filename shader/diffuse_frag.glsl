@@ -62,13 +62,19 @@ uniform Material material;
 
 // Lights
 uniform DirectionalLight dirLight;
-uniform PointLight pointLights[MAX_POINT_LIGHTS];
-uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
+
+uniform PointLight pointRedLight;
+uniform PointLight pointGreenLight;
+uniform PointLight pointBlueLight;
+uniform PointLight pointCeilingLight;
+
+uniform SpotLight spotDJLights;
+uniform SpotLight spotDanceLights;
 
 // Light control
-uniform int numPointLights;
-uniform int numSpotLights;
 uniform bool useDirLight;
+uniform bool usePointLight;
+uniform bool useSpotLight;
 
 // Camera position
 uniform vec3 viewPos;
@@ -81,12 +87,6 @@ uniform bool useBlinnPhong;
 uniform vec3 ColorTint = vec3(1.0, 1.0, 1.0);
 
 uniform bool useInstancing;
-
-// The vertex shader will feed this input
-in vec2 texCoord;
-
-// Wordspace normal passed from vertex shader
-in vec4 normal;
 
 // Texture index from instancing
 flat in int textureIndex;
@@ -132,14 +132,16 @@ void main() {
         result += CalcDirLight(dirLight, norm, viewDir, texColor.rgb);
     }
 
-    // Point lights
-    for(int i = 0; i < numPointLights && i < MAX_POINT_LIGHTS; i++) {
-        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir, texColor.rgb);
+    if (usePointLight) {
+        result += CalcPointLight(pointRedLight, norm, FragPos, viewDir, texColor.rgb);
+        result += CalcPointLight(pointGreenLight, norm, FragPos, viewDir, texColor.rgb);
+        result += CalcPointLight(pointBlueLight, norm, FragPos, viewDir, texColor.rgb);
+        result += CalcPointLight(pointCeilingLight, norm, FragPos, viewDir, texColor.rgb);
     }
 
-    // Spotlights
-    for(int i = 0; i < numSpotLights && i < MAX_SPOT_LIGHTS; i++) {
-        result += CalcSpotLight(spotLights[i], norm, FragPos, viewDir, texColor.rgb);
+    if (useSpotLight) {
+        result += CalcSpotLight(spotDJLights, norm, FragPos, viewDir, texColor.rgb);
+        result += CalcSpotLight(spotDanceLights, norm, FragPos, viewDir, texColor.rgb);
     }
 
     // Apply color tint

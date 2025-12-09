@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "grid.h"
 #include "lighting.h"
+#include "Skybox.h"
 
 class Timeline;
 
@@ -21,12 +22,23 @@ public:
   void renderGrid();
 
   Material defaultMaterial;
+
   DirectionalLight directionalLight;
-  std::vector<PointLight> pointLights;
-  std::vector<SpotLight> spotLights;
+
+  PointLight redLight;
+  PointLight greenLight;
+  PointLight blueLight;
+  PointLight ceilingLight;
+
+  SpotLight djSpot;
+  SpotLight danceSpot;
+
   std::shared_ptr<Object> building; // needed for referencing building for light positions
 
   bool useDirLight = true;
+  bool usePointLight = true;
+  bool useSpotLight = true;
+
   bool useBlinnPhong = true;
 
   void setupLighting();
@@ -39,6 +51,8 @@ public:
   std::unique_ptr<Timeline> timeline;
 
   std::list<std::shared_ptr<Object>> objects;
+
+  std::unique_ptr<Skybox> skybox;
 
   std::map< int, int > keyboard;
 
