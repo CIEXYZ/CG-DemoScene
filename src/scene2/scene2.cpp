@@ -561,7 +561,7 @@ private:
       glm::vec3(0.0f, 1.2f, 6.0f),  // Position
       glm::vec3(0.0f, 1.2f, 6.0f),
       glm::vec3(0.0f, 1.2f, 6.0f),
-      glm::vec3(-90.0f, -20.0f, 0.0f), // Rotation (yaw, pitch, roll)
+      glm::vec3(-90.0f, -5.0f, 0.0f), // Rotation (yaw, pitch, roll)
       0.0f,
       "Init scene;"
     ));
@@ -573,7 +573,7 @@ private:
       glm::vec3(0.0f, 1.2f, 5.5f),
       glm::vec3(-90.0f, -5.0f, 0.0f),
       3.0f,
-      "Doors opening, light fades;"
+      "Doors opening;"
     ));
 
     scene.timeline->addEvent(new CameraMovementEvent(
@@ -711,37 +711,37 @@ private:
       glm::vec3(-2.9f, 1.4f, 2.9f),  // Position
       glm::vec3(0.0f, 1.2f, 6.0f),
       glm::vec3(0.0f, 1.2f, 6.0f),
-      glm::vec3(-0.2f, -50.0f, -12.0f),
+      glm::vec3(-50.0f, 0.0f, 0.0f),
       0.0f,
       "Camera 2;"
     ));
 
     scene.timeline->addEvent(new CameraMovementEvent(
       95.0f,
-      glm::vec3(3.4f, 0.85, 2.5f),  // Position
+      glm::vec3(3.4f, 0.55, 2.6f),  // Position
       glm::vec3(0.0f, 1.2f, 6.0f),
       glm::vec3(0.0f, 1.2f, 6.0f),
-      glm::vec3(0.0f, -156.0f, 1.0f),
+      glm::vec3(-150.0f, 10.0f, 1.0f),
       0.0f,
       "Camera 3;"
     ));
 
     scene.timeline->addEvent(new CameraMovementEvent(
       115.0f,
-      glm::vec3(0.1f, 2.3f, 0.5f),  // Position
+      glm::vec3(0.1f, 2.3f, 0.9f),  // Position
       glm::vec3(0.0f, 1.2f, 6.0f),
       glm::vec3(0.0f, 1.2f, 6.0f),
-      glm::vec3(-0.9f, 90.0f, -58.0f),
+      glm::vec3(90.0f, -90.0f, 0.0f),
       0.0f,
       "Camera 4;"
     ));
 
     scene.timeline->addEvent(new CameraMovementEvent(
       135.0f,
-      glm::vec3(0.0f, 2.6f, -0.2f),  // Position
+      glm::vec3(0.0f, 2.3f, -0.2f),  // Position
       glm::vec3(0.0f, 1.2f, 6.0f),
       glm::vec3(0.0f, 1.2f, 6.0f),
-      glm::vec3(0.0f, -90.0f, -11.0f),
+      glm::vec3(-90.0f, 0.0f, 0.0f),
       0.0f,
       "Camera 5;"
     ));
