@@ -9,7 +9,7 @@
 - [X] (2b) Unikátne mapovanie textúr pomocou UV koordinátov na 3D objekt
 - [x] (2b) Efektívne inštancovanie 3D objektu: zobrazenie aspoň 5000 inštancií za použitia OpenGL inštancovania
 - [X] (2b) Priesvitné objekty
-- [ ] (1b) Objekt s využitím hrbolatej textúry (normal mapping)
+- [X] (1b) Objekt s využitím hrbolatej textúry (normal mapping)
 
 ### Scéna
 - [X] (2b) Procedurálne generovaná scéna
@@ -33,8 +33,8 @@
 ### Osvetlenie za pomoci viacerých svetelných zdrojov
 - [X] (3b) Použitie všetkých typov zdrojov svetla s príslušnými parametrami: smerové, bodové, reflektor
 - [X] (1b) Zmena pozície a orientácie zdrojov svetla a odtieňov farby osvetlenia
-- [ ] (1b) Správne kombinovať difúzne svetlo z 2 zdrojov svetla s difúznymi materiálmi
-- [ ] (2b) Správny Phongov osvetlovací model s viacerými (aspoň 3) zdrojmi svetla, pričom musí byť splnené: 
+- [X] (1b) Správne kombinovať difúzne svetlo z 2 zdrojov svetla s difúznymi materiálmi
+- [X] (2b) Správny Phongov osvetlovací model s viacerými (aspoň 3) zdrojmi svetla, pričom musí byť splnené: 
   - Správne tlmenie svetla na základe hĺbky
   - Použité aspoň tri zložky farby materiálu a tri zložky farby svetla
   - Správne kombinovať zložky farby materialu a zložky farby svetla
@@ -46,4 +46,4 @@
 ### Post-processing. Zobrazenie scény s aplikovaným post-processing filtrom
 - [X] (1b) Základný per-pixel filter napr. grayscale
 - [X] (2b) konvolučný filter cez framebuffer
-- [X] (4b) pokročilý filter, napr. bloom cez framebuffer
+- [] (4b) pokročilý filter, napr. bloom cez framebuffer

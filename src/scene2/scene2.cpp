@@ -16,6 +16,7 @@
 #include "Timeline.h"
 #include "Crowd.h"
 #include "Skybox.h"
+#include "PostProcessing.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -29,6 +30,9 @@ private:
   bool freeCamera = false;
 
   Scene scene;
+
+  // Post-processing
+  std::unique_ptr<PostProcessing> postProcessing;
 
   // Time tracking
   float time = 0.0f;
@@ -150,8 +154,12 @@ private:
     scene.objects.push_back(discoBall); //Disco ball
 
     scene.building = std::make_shared<Object>("models/building/scene.gltf");
-    scene.building->useNormalMapping = false;
-    scene.building->setNormalMap(0, "models/building/textures/M_Floor_normal.png");
+    scene.building->useNormalMapping = true;
+    scene.building->setNormalMap(17, "models/building/textures/M_Floor_normal.png");
+    scene.building->setNormalMap(13, "models/building/textures/M_BenchSeatandPicture_normal.png");
+    scene.building->setNormalMap(1, "models/building/textures/M_LargeSpeakerandGlasses_normal.png");
+    scene.building->setNormalMap(5, "models/building/textures/M_LightsMediumProps_normal.png");
+    scene.building->setNormalMap(9, "models/building/textures/M_Table_normal.png");
     scene.building->position = {0.0f, 0.0f, 0.0f};
     scene.building->rotation = {0.0f, 0.0f, 0.0f};
     scene.building->scale = {1.0f, 1.0f, 1.0f};
@@ -1026,6 +1034,8 @@ public:
 
     glViewport(0, 0, WIDTH, HEIGHT);
 
+    postProcessing = std::make_unique<PostProcessing>(WIDTH, HEIGHT);
+
     initScene();
 
     handleWindowResize(WIDTH, HEIGHT);
@@ -1077,6 +1087,24 @@ public:
                   << -scene.camera->back.y << ", "
                   << -scene.camera->back.z << ")" << std::endl;
         std::cout << "=======================" << std::endl;
+      }
+
+      // Post-processing mode switching
+      if (key == GLFW_KEY_1) {
+        postProcessing->setMode(PostProcessingMode::NONE);
+        std::cout << "Post-processing: NONE" << std::endl;
+      }
+      if (key == GLFW_KEY_2) {
+        postProcessing->setMode(PostProcessingMode::GRAYSCALE);
+        std::cout << "Post-processing: GRAYSCALE" << std::endl;
+      }
+      if (key == GLFW_KEY_3) {
+        postProcessing->setMode(PostProcessingMode::BLUR);
+        std::cout << "Post-processing: BLUR" << std::endl;
+      }
+      if (key == GLFW_KEY_4) {
+        postProcessing->setMode(PostProcessingMode::BLOOM);
+        std::cout << "Post-processing: BLOOM" << std::endl;
       }
 
       if (key == GLFW_KEY_F) {
@@ -1142,6 +1170,11 @@ public:
     float dt = currentTime - time;
     time = currentTime;
 
+    // Begin rendering to post-processing framebuffer
+    if (postProcessing) {
+      postProcessing->beginFrame();
+    }
+
     glClearColor(.2f, .2f, .2f, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -1161,6 +1194,11 @@ public:
       // }
       scene.renderGrid();
     }
+
+    if (postProcessing) {
+      postProcessing->endFrame();
+      postProcessing->render();
+    }
   }
 };
 
@@ -1178,6 +1216,10 @@ int main() {
   std::cout << "T - Toggle timeline" << std::endl;
   std::cout << "SPACE - Start/Restart timeline" << std::endl;
   std::cout << "ENTER - Pause/Resume timeline" << std::endl;
+  std::cout << "1 - No post-processing" << std::endl;
+  std::cout << "2 - Grayscale filter" << std::endl;
+  std::cout << "3 - Blur effect" << std::endl;
+  std::cout << "4 - Bloom effect" << std::endl;
   std::cout << "=================" << std::endl;
 
   SceneWindow window;

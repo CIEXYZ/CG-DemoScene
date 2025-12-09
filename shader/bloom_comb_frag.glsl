@@ -4,7 +4,7 @@ out vec4 FragColor;
 
 uniform sampler2D sceneTexture;
 uniform sampler2D bloomTexture;
-uniform float bloomStrength = 0.04;
+uniform float bloomStrength = 0.8f;
 
 void main() {
     vec3 scene = texture(sceneTexture, TexCoord).rgb;

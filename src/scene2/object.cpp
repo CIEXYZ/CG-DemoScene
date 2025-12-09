@@ -391,20 +391,27 @@ void Object::render(Scene &scene) {
         // Skip transparent meshes in first pass
         if (isTransparent || billboarding || forceTransparent) continue;
 
-        // Set diffuse texture
+        // Set diffuse texture to texture unit 0
         auto it = materialTextures.find(mesh->getMaterialIndex(i));
         if (it != materialTextures.end()) {
-            shader->setUniform("Texture", *(it->second));
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, it->second->getTexture());
+            shader->setUniform("Texture", 0);
         }
 
-        // Set normal map if using normal mapping
+        // Set normal map to texture unit 1
+        bool hasNormalMap = false;
         if (useNormalMapping) {
             auto normalIt = normalMaps.find(mesh->getMaterialIndex(i));
             if (normalIt != normalMaps.end()) {
-                shader->setUniform("NormalMap", *(normalIt->second));
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, normalIt->second->getTexture());
+                shader->setUniform("NormalMap", 1); //*(normalIt->second)
+                hasNormalMap = true;
             }
         }
 
+        shader->setUniform("useNormalMap", hasNormalMap);
         mesh->renderSingleMesh(i);
     }
 
@@ -452,20 +459,27 @@ void Object::render(Scene &scene) {
 
     // Render transparent meshes in sorted order
     for (const auto& meshInfo : transparentMeshes) {
-        // Set diffuse texture
+        // Set diffuse texture to texture unit 0
         auto it = materialTextures.find(mesh->getMaterialIndex(meshInfo.index));
         if (it != materialTextures.end()) {
-            shader->setUniform("Texture", *(it->second));
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, it->second->getTexture());
+            shader->setUniform("Texture", 0);
         }
 
-        // Set normal map if using normal mapping
+        // Set normal map to texture unit 1
+        bool hasNormalMap = false;
         if (useNormalMapping) {
             auto normalIt = normalMaps.find(mesh->getMaterialIndex(meshInfo.index));
             if (normalIt != normalMaps.end()) {
-                shader->setUniform("NormalMap", *(normalIt->second));
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, normalIt->second->getTexture());
+                shader->setUniform("NormalMap", 1);
+                hasNormalMap = true;
             }
         }
 
+        shader->setUniform("useNormalMap", hasNormalMap);
         mesh->renderSingleMesh(meshInfo.index);
     }
 

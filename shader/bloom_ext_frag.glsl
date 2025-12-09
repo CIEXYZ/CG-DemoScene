@@ -3,7 +3,7 @@ in vec2 TexCoord;
 out vec4 FragColor;
 
 uniform sampler2D screenTexture;
-uniform float threshold = 1.0;
+uniform float threshold = 0.2f;
 
 void main() {
     vec3 color = texture(screenTexture, TexCoord).rgb;

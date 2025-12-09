@@ -42,7 +42,10 @@ void main() {
 
         // Reorthogonalize T with respect to N
         T = normalize(T - dot(T, N) * N);
-        B = cross(N, T);
+
+        vec3 B_new = cross(N, T);
+        float handedness = dot(cross(N, T), B) > 0.0 ? 1.0 : -1.0;
+        B = B_new * handedness;
     }
 
     TBN = mat3(T, B, N);

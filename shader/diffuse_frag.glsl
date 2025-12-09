@@ -156,18 +156,7 @@ vec3 getNormal() {
         // Sample normal map
         vec3 normalMap = texture(NormalMap, vec2(texCoord.x, 1.0 - texCoord.y) + TextureOffset).rgb;
 
-        // Check if this is actually a normal map
-        vec3 defaultNormalColor = vec3(0.5, 0.5, 1.0);
-        float dist = length(normalMap - defaultNormalColor);
-
-        if (dist < 0.01) {
-            return normalize(normal);
-        }
-
         normalMap = normalMap * 2.0 - 1.0;
-
-        // Normalize the normal map vector
-        normalMap = normalize(normalMap);
 
         // Check if TBN matrix is valid
         vec3 T = TBN[0];

@@ -133,7 +133,7 @@ std::string ModelLoader::findNormalMapByName(const std::string& diffusePath, con
         // Check if file exists
         std::ifstream file(fullPath);
         if (file.good()) {
-            std::cout << "  Found normal map: " << fullPath << std::endl;
+            std::cout << "Found normal map: " << fullPath << std::endl;
             return fullPath;
         }
 

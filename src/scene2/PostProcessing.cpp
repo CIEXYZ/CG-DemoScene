@@ -1,12 +1,19 @@
 #include "PostProcessing.h"
 #include <iostream>
 
-PostProcessing::PostProcessing(int width, int height) 
-    : width(width), height(height) {
+#include <shaders/grayscale_vert_glsl.h>
+#include <shaders/grayscale_frag_glsl.h>
+
+#include <shaders/blur_frag_glsl.h>
+
+#include <shaders/bloom_ext_frag_glsl.h>
+#include <shaders/bloom_comb_frag_glsl.h>
+
+PostProcessing::PostProcessing(int width, int height) : width(width), height(height) {
     
     setupFramebuffers();
-    //setupShaders();
     setupQuad();
+    setupShaders();
 }
 
 PostProcessing::~PostProcessing() {
@@ -66,25 +73,16 @@ void PostProcessing::setupFramebuffers() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-// void PostProcessing::setupShaders() {
-//     // Compile shaders
-//     grayscaleShader = std::make_unique<ppgso::Shader>();
-//
-//     blurShader = std::make_unique<ppgso::Shader>(
-//         std::vector<GLuint>{}, std::vector<GLuint>{}
-//     );
-//
-//     bloomExtractShader = std::make_unique<ppgso::Shader>(
-//         std::vector<GLuint>{}, std::vector<GLuint>{}
-//     );
-//
-//     bloomCombineShader = std::make_unique<ppgso::Shader>(
-//         std::vector<GLuint>{}, std::vector<GLuint>{}
-//     );
-//
-//     // Manually compile (simplified - you may need to adapt to your Shader class)
-//     // For now, we'll compile them when needed in render methods
-// }
+void PostProcessing::setupShaders() {
+    // Compile shaders
+    grayscaleShader = std::make_unique<ppgso::Shader>(grayscale_vert_glsl, grayscale_frag_glsl);
+
+    blurShader = std::make_unique<ppgso::Shader>(grayscale_vert_glsl, blur_frag_glsl);
+
+    bloomExtractShader = std::make_unique<ppgso::Shader>(grayscale_vert_glsl, bloom_ext_frag_glsl);
+
+    bloomCombineShader = std::make_unique<ppgso::Shader>(grayscale_vert_glsl, bloom_comb_frag_glsl);
+}
 
 void PostProcessing::setupQuad() {
     float quadVertices[] = {
@@ -148,78 +146,103 @@ void PostProcessing::renderGrayscale() {
     // Render to screen with grayscale shader
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    
-    // Use grayscale shader (you'll need to properly compile it)
-    // For now, pseudocode:
-    // grayscaleShader->use();
-    // grayscaleShader->setUniform("screenTexture", mainColorTexture);
-    
+    glDisable(GL_DEPTH_TEST);
+
+    grayscaleShader->use();
+    grayscaleShader->setUniform("screenTexture", 0);
+
     glBindVertexArray(quadVAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mainColorTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 void PostProcessing::renderBlur() {
+    glDisable(GL_DEPTH_TEST);
+
     // Two-pass Gaussian blur
     bool horizontal = true;
     int passes = 10;  // More passes = more blur
-    
+
+    blurShader->use();
+
     for (int i = 0; i < passes; i++) {
         glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-        
-        // blurShader->use();
-        // blurShader->setUniform("horizontal", horizontal);
-        // blurShader->setUniform("screenTexture", i == 0 ? mainColorTexture : pingpongTextures[!horizontal]);
-        
+
+        blurShader->setUniform("horizontal", horizontal);
+        blurShader->setUniform("screenTexture", 0);
+
         glBindVertexArray(quadVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, i == 0 ? mainColorTexture : pingpongTextures[!horizontal]);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        
+
         horizontal = !horizontal;
     }
-    
+
     // Final render to screen
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(quadVAO);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, pingpongTextures[!horizontal]);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 void PostProcessing::renderBloom() {
-    // Step 1: Extract bright areas
+    glDisable(GL_DEPTH_TEST);
+
+    //Extract bright areas
     glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[0]);
-    // bloomExtractShader->use();
-    // bloomExtractShader->setUniform("screenTexture", mainColorTexture);
-    // bloomExtractShader->setUniform("threshold", 1.0f);
+    bloomExtractShader->use();
+    bloomExtractShader->setUniform("screenTexture", 0);
+    bloomExtractShader->setUniform("threshold", 1.0f);
+
     glBindVertexArray(quadVAO);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mainColorTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    
-    // Step 2: Blur bright areas (ping-pong)
+
+    //Blur bright areas (ping-pong)
     bool horizontal = true;
+    blurShader->use();
+
     for (int i = 0; i < 10; i++) {
         glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-        // blurShader->use();
-        // blurShader->setUniform("horizontal", horizontal);
+        blurShader->setUniform("horizontal", horizontal);
+        blurShader->setUniform("screenTexture", 0);
+
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, pingpongTextures[!horizontal]);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         horizontal = !horizontal;
     }
-    
-    // Step 3: Combine with original scene
+
+    //Combine with original scene
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    // bloomCombineShader->use();
-    // bloomCombineShader->setUniform("sceneTexture", mainColorTexture);
-    // bloomCombineShader->setUniform("bloomTexture", pingpongTextures[!horizontal]);
+
+    bloomCombineShader->use();
+    bloomCombineShader->setUniform("sceneTexture", 0);
+    bloomCombineShader->setUniform("bloomTexture", 1);
+    bloomCombineShader->setUniform("bloomStrength", 0.04f);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mainColorTexture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, pingpongTextures[!horizontal]);
+
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 void PostProcessing::resize(int newWidth, int newHeight) {
