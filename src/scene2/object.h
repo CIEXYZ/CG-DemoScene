@@ -31,6 +31,7 @@ public:
   bool isGrounded = false;
   bool forceTransparent = false;
   bool isParticle = false;
+  bool useNormalMapping = false;
 
   AABB boundingBox;
 
@@ -59,6 +60,7 @@ public:
   virtual void stopOnZAxis(std::shared_ptr<Object> &obj);
   virtual void render(Scene &scene);
 
+  void setNormalMap(unsigned int materialIndex, const std::string& normalMapPath);
   void setMesh(const std::string& meshPath);
   void setShader(const std::string& vertShader, const std::string& fragShader);
 
@@ -77,6 +79,8 @@ public:
   std::shared_ptr<ppgso::Mesh_Assimp> mesh;
   std::unique_ptr<ppgso::Shader> shader;
   std::map<unsigned int, std::shared_ptr<ppgso::Texture>> materialTextures;
+  std::map<unsigned int, std::shared_ptr<ppgso::Texture>> normalMaps;
+  std::map<unsigned int, std::shared_ptr<ppgso::Texture>> specularMaps;
 
   bool ownsMesh = true;
   std::set<std::string> transparentMeshNames;

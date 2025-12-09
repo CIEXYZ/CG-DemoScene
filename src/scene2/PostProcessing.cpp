@@ -5,7 +5,7 @@ PostProcessing::PostProcessing(int width, int height)
     : width(width), height(height) {
     
     setupFramebuffers();
-    setupShaders();
+    //setupShaders();
     setupQuad();
 }
 
@@ -66,25 +66,25 @@ void PostProcessing::setupFramebuffers() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void PostProcessing::setupShaders() {
-    // Compile shaders
-    grayscaleShader = std::make_unique<ppgso::Shader>();
-    
-    blurShader = std::make_unique<ppgso::Shader>(
-        std::vector<GLuint>{}, std::vector<GLuint>{}
-    );
-    
-    bloomExtractShader = std::make_unique<ppgso::Shader>(
-        std::vector<GLuint>{}, std::vector<GLuint>{}
-    );
-    
-    bloomCombineShader = std::make_unique<ppgso::Shader>(
-        std::vector<GLuint>{}, std::vector<GLuint>{}
-    );
-    
-    // Manually compile (simplified - you may need to adapt to your Shader class)
-    // For now, we'll compile them when needed in render methods
-}
+// void PostProcessing::setupShaders() {
+//     // Compile shaders
+//     grayscaleShader = std::make_unique<ppgso::Shader>();
+//
+//     blurShader = std::make_unique<ppgso::Shader>(
+//         std::vector<GLuint>{}, std::vector<GLuint>{}
+//     );
+//
+//     bloomExtractShader = std::make_unique<ppgso::Shader>(
+//         std::vector<GLuint>{}, std::vector<GLuint>{}
+//     );
+//
+//     bloomCombineShader = std::make_unique<ppgso::Shader>(
+//         std::vector<GLuint>{}, std::vector<GLuint>{}
+//     );
+//
+//     // Manually compile (simplified - you may need to adapt to your Shader class)
+//     // For now, we'll compile them when needed in render methods
+// }
 
 void PostProcessing::setupQuad() {
     float quadVertices[] = {

@@ -6,7 +6,7 @@
 #include <shaders/diffuse_vert_glsl.h>
 #include <shaders/diffuse_frag_glsl.h>
 #include <fstream>
-#include <json.hpp>
+//#include <json.hpp>
 
 #include "Emitter.h"
 #include "scene.h"
@@ -59,7 +59,7 @@ private:
     scene.objects.push_back(man1); //Man with different texture
 
     auto woman = std::make_shared<PersonObject>("models/people/female/scene.gltf", "models/people/female/animations/idle_animation.fbx");
-    woman->position = {9.0f, 0.0f, 0.0f};
+    woman->position = {1.0f, 0.0f, 0.0f};
     woman->rotation = {0.0f, 0.0f, 0.0f};
     woman->scale = {.011f, .011f, .011f};
     scene.objects.push_back(woman); //Woman
@@ -76,8 +76,9 @@ private:
     discoBall->scale = {1.2f, 1.2f, 1.2f};
     scene.objects.push_back(discoBall); //Disco ball
 
-    //MIGHT HAVE FUCKED THIS THB
     scene.building = std::make_shared<Object>("models/building/scene.gltf");
+    scene.building->useNormalMapping = false;
+    danceFloor->setNormalMap(0, "models/building/textures/M_Floor_normal.png");
     scene.building->position = {0.0f, 0.0f, 0.0f};
     scene.building->rotation = {0.0f, 0.0f, 0.0f};
     scene.building->scale = {1.0f, 1.0f, 1.0f};

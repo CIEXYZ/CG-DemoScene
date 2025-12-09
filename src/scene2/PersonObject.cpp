@@ -92,11 +92,62 @@ void PersonObject::render(Scene &scene) {
 
     shader->use();
 
+    //BASIC
     shader->setUniform("ProjectionMatrix", scene.camera->projectionMatrix);
     shader->setUniform("ViewMatrix", scene.camera->viewMatrix);
     shader->setUniform("ModelMatrix", modelMatrix);
 
-    //TODO: add light
+    //MATERIAL PROPERTIES
+    shader->setUniform("material.ambient", scene.defaultMaterial.ambient);
+    shader->setUniform("material.diffuse", scene.defaultMaterial.diffuse);
+    shader->setUniform("material.specular", scene.defaultMaterial.specular);
+    shader->setUniform("material.shininess", scene.defaultMaterial.shininess);
+
+    //CAMERA POSITION
+    shader->setUniform("viewPos", scene.camera->position);
+
+    //DIRECTIONAL
+    shader->setUniform("useDirLight", scene.useDirLight);
+    if (scene.useDirLight) {
+        shader->setUniform("dirLight.direction", scene.directionalLight.direction);
+        shader->setUniform("dirLight.ambient", scene.directionalLight.ambient);
+        shader->setUniform("dirLight.diffuse", scene.directionalLight.diffuse);
+        shader->setUniform("dirLight.specular", scene.directionalLight.specular);
+    }
+    //POINT
+    shader->setUniform("numPointLights", (int)scene.pointLights.size());
+    for (size_t i = 0; i < scene.pointLights.size() && i < 10; i++) {
+        std::string base = "pointLights[" + std::to_string(i) + "]";
+        shader->setUniform(base + ".position", scene.pointLights[i].position);
+        shader->setUniform(base + ".ambient", scene.pointLights[i].ambient);
+        shader->setUniform(base + ".diffuse", scene.pointLights[i].diffuse);
+        shader->setUniform(base + ".specular", scene.pointLights[i].specular);
+        shader->setUniform(base + ".constant", scene.pointLights[i].constant);
+        shader->setUniform(base + ".linear", scene.pointLights[i].linear);
+        shader->setUniform(base + ".quadratic", scene.pointLights[i].quadratic);
+    }
+
+    //SPOTLIGHTS
+    shader->setUniform("numSpotLights", (int)scene.spotLights.size());
+    for (size_t i = 0; i < scene.spotLights.size() && i < 5; i++) {
+        std::string base = "spotLights[" + std::to_string(i) + "]";
+        shader->setUniform(base + ".position", scene.spotLights[i].position);
+        shader->setUniform(base + ".direction", scene.spotLights[i].direction);
+        shader->setUniform(base + ".ambient", scene.spotLights[i].ambient);
+        shader->setUniform(base + ".diffuse", scene.spotLights[i].diffuse);
+        shader->setUniform(base + ".specular", scene.spotLights[i].specular);
+        shader->setUniform(base + ".cutOff", scene.spotLights[i].cutOff);
+        shader->setUniform(base + ".outerCutOff", scene.spotLights[i].outerCutOff);
+        shader->setUniform(base + ".constant", scene.spotLights[i].constant);
+        shader->setUniform(base + ".linear", scene.spotLights[i].linear);
+        shader->setUniform(base + ".quadratic", scene.spotLights[i].quadratic);
+    }
+
+     //LIGHTING OPTIONS
+    shader->setUniform("useBlinnPhong", scene.useBlinnPhong);
+
+    // shader->setUniform("testLightPos", scene.pointLights[0].position);
+    // shader->setUniform("testLightColor", glm::vec3(1.0f, 0.0f, 0.0f));
 
     if (hasAnimation && animator) {
         shader->setUniform("hasAnimation", true);

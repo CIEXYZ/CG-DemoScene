@@ -17,7 +17,7 @@ ppgso::Mesh_Assimp::Mesh_Assimp(const std::string &obj_file) {
     basePath = getParentPath(obj_file);
 
     // Load the scene - importer is now a member so scene stays valid
-    scene = importer.ReadFile(obj_file, aiProcess_Triangulate | aiProcess_FlipUVs);
+    scene = importer.ReadFile(obj_file, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::stringstream msg;
@@ -64,13 +64,6 @@ ppgso::Mesh_Assimp::Mesh_Assimp(const std::string &obj_file) {
             aiString texPath;
             material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath);
             std::cout << "  Diffuse texture: " << texPath.C_Str() << std::endl;
-        }
-
-        // Normal texture
-        if (material->GetTextureCount(aiTextureType_NORMALS) > 0) {
-            aiString texPath;
-            material->GetTexture(aiTextureType_NORMALS, 0, &texPath);
-            std::cout << "  Normal texture: " << texPath.C_Str() << std::endl;
         }
 
         // Specular texture
@@ -194,6 +187,40 @@ void ppgso::Mesh_Assimp::processMesh(aiMesh *mesh, const glm::mat4& transform) {
 
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    }
+
+    // Process tangents
+    if (mesh->HasTangentsAndBitangents()) {
+        std::vector<glm::vec3> tangents;
+        std::vector<glm::vec3> bitangents;
+        tangents.reserve(mesh->mNumVertices);
+        bitangents.reserve(mesh->mNumVertices);
+
+        glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(transform)));
+
+        for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+            glm::vec3 tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+            glm::vec3 bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+
+            tangents.push_back(glm::normalize(normalMatrix * tangent));
+            bitangents.push_back(glm::normalize(normalMatrix * bitangent));
+        }
+
+        // Upload tangents
+        GLuint tbo;
+        glGenBuffers(1, &tbo);
+        glBindBuffer(GL_ARRAY_BUFFER, tbo);
+        glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(glm::vec3), tangents.data(), GL_STATIC_DRAW);
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        // Upload bitangents
+        GLuint bbo;
+        glGenBuffers(1, &bbo);
+        glBindBuffer(GL_ARRAY_BUFFER, bbo);
+        glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(glm::vec3), bitangents.data(), GL_STATIC_DRAW);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
 
     // Process indices

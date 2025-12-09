@@ -18,6 +18,12 @@ std::string getFileName(const std::string& path) {
     return (pos == std::string::npos) ? path : path.substr(pos + 1);
 }
 
+std::string getFileNameWithoutExtension(const std::string& path) {
+    std::string filename = getFileName(path);
+    auto pos = filename.rfind('.');
+    return (pos == std::string::npos) ? filename : filename.substr(0, pos);
+}
+
 std::string combinePaths(const std::string& base, const std::string& relative) {
     if (base.empty()) return relative;
     if (relative.empty()) return base;
@@ -81,12 +87,17 @@ std::shared_ptr<ppgso::Texture> ModelLoader::loadTextureFile(const std::string& 
     }
 }
 
-
 //Placeholder texture
 std::unique_ptr<ppgso::Texture> ModelLoader::createWhiteTexture() {
     // Create a texture as placeholder
     ppgso::Image image(1, 1);
     image.setPixel(0, 0, {255, 255, 255});
+    return std::make_unique<ppgso::Texture>(std::move(image));
+}
+
+std::unique_ptr<ppgso::Texture> ModelLoader::createDefaultNormalMap() {
+    ppgso::Image image(1, 1);
+    image.setPixel(0, 0, {128, 128, 255, 255});
     return std::make_unique<ppgso::Texture>(std::move(image));
 }
 
@@ -100,8 +111,48 @@ std::string ModelLoader::findTextureFile(const std::string& texturePath, const s
     return textureFullPath;
 }
 
-std::map<unsigned int, std::shared_ptr<ppgso::Texture>> ModelLoader::loadTextures(const ppgso::Mesh_Assimp* mesh) {
-    std::map<unsigned int, std::shared_ptr<ppgso::Texture>> materialTextures;
+std::string ModelLoader::findNormalMapByName(const std::string& diffusePath, const std::string& baseDir) {
+    // Get the base name without extension
+    std::string baseName = getFileNameWithoutExtension(diffusePath);
+    std::string ext = getFileExtension(diffusePath);
+
+    std::vector<std::string> patterns = {
+        baseName + "_normal" + ext,      // texture_normal.png
+    };
+
+    // Also try .png if original was .jpg and vice versa
+    std::string altExt = (ext == ".png") ? ".jpg" : ".png";
+    patterns.push_back(baseName + "_normal" + altExt);
+    patterns.push_back(baseName + "_Normal" + altExt);
+
+    std::string diffuseDir = diffusePath.substr(0, diffusePath.find_last_of("/\\") + 1);
+
+    for (const auto& pattern : patterns) {
+        std::string fullPath = diffuseDir + pattern;
+
+        // Check if file exists
+        std::ifstream file(fullPath);
+        if (file.good()) {
+            std::cout << "  Found normal map: " << fullPath << std::endl;
+            return fullPath;
+        }
+
+        std::string texturesPath = combinePaths(baseDir, "textures");
+        std::string altPath = combinePaths(texturesPath, pattern);
+        std::ifstream altFile(altPath);
+        if (altFile.good()) {
+            std::cout << "Found normal map: " << altPath << std::endl;
+            return altPath;
+        }
+    }
+
+    return "";
+}
+
+std::map<unsigned int, ModelLoader::MaterialTextures> ModelLoader::loadAllTextures(
+    const ppgso::Mesh_Assimp* mesh) {
+
+    std::map<unsigned int, MaterialTextures> materialTextures;
 
     const aiScene* scene = mesh->getScene();
     if (!scene) {
@@ -110,54 +161,81 @@ std::map<unsigned int, std::shared_ptr<ppgso::Texture>> ModelLoader::loadTexture
     }
 
     std::string baseDir = mesh->getBasePath();
-    // std::cout << "Loading textures from: " << baseDir << std::endl;
-    // std::cout << "Number of materials: " << scene->mNumMaterials << std::endl;
+    std::cout << "\n=== Loading textures from: " << baseDir << " ===" << std::endl;
 
-    // Load texture for each material
     for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
         aiMaterial* material = scene->mMaterials[i];
+        MaterialTextures matTex;
 
-        // Get material name
         aiString materialName;
         material->Get(AI_MATKEY_NAME, materialName);
-        // std::cout << "\nMaterial " << i << ": " << materialName.C_Str() << std::endl;
+        std::cout << "\nMaterial " << i << ": " << materialName.C_Str() << std::endl;
 
-        // Try to load diffuse texture
+        std::string diffuseFullPath;
+
+        // Load diffuse texture
         if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
             aiString texPath;
             material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath);
+            diffuseFullPath = findTextureFile(texPath.C_Str(), baseDir);
 
-            std::string texPathStr = texPath.C_Str();
-            // std::cout << "  Texture path from FBX: " << texPathStr << std::endl;
+            if (!diffuseFullPath.empty()) {
+                std::cout << "Diffuse: " << diffuseFullPath << std::endl;
+                matTex.diffuse = loadTextureFile(diffuseFullPath);
+            }
+        }
 
-            // Find the actual file
-            std::string fullPath = findTextureFile(texPathStr, baseDir);
+        //Normal map
+        if (!diffuseFullPath.empty()) {
+            std::cout << "Looking for normal map" << std::endl;
+            std::string normalPath = findNormalMapByName(diffuseFullPath, baseDir);
+            if (!normalPath.empty()) {
+                matTex.normal = loadTextureFile(normalPath);
+                if (matTex.normal) {
+                    std::cout << "Normal map loaded successfully!" << std::endl;
+                }
+            }
+        }
+
+        // Load specular map
+        if (material->GetTextureCount(aiTextureType_SPECULAR) > 0) {
+            aiString texPath;
+            material->GetTexture(aiTextureType_SPECULAR, 0, &texPath);
+            std::string fullPath = findTextureFile(texPath.C_Str(), baseDir);
 
             if (!fullPath.empty()) {
-                // std::cout << "  Loading: " << fullPath << std::endl;
-                auto texture = loadTextureFile(fullPath);
-                if (texture) {
-                    materialTextures[i] = std::move(texture);
-                    // std::cout << "  Successfully loaded!" << std::endl;
-                }
-            } else {
-                // std::cerr << "  Texture file not found!" << std::endl;
+                std::cout << "  Specular: " << fullPath << std::endl;
+                matTex.specular = loadTextureFile(fullPath);
             }
-        } else {
-            // std::cout << "  No diffuse texture specified" << std::endl;
         }
+
+        // Create defaults
+        if (!matTex.diffuse) {
+            std::cout << "  Using white placeholder for diffuse" << std::endl;
+            matTex.diffuse = createWhiteTexture();
+        }
+        if (!matTex.normal) {
+            std::cout << "  Using default flat normal map" << std::endl;
+            matTex.normal = createDefaultNormalMap();
+        }
+
+        materialTextures[i] = matTex;
     }
 
-    // Create placeholder texture for materials without textures
-    std::cout << "\nCreating fallback textures..." << std::endl;
-    for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
-        if (materialTextures.find(i) == materialTextures.end()) {
-            std::cout << "Material " << i << " using placeholder texture" << std::endl;
-            materialTextures[i] = createWhiteTexture();
-        }
-    }
-
-    std::cout << "\nTotal textures loaded: " << materialTextures.size() << std::endl;
-
+    std::cout << "\n=== Total materials: " << materialTextures.size() << " ===" << std::endl;
     return materialTextures;
+}
+
+// Backwards compatibility - just return diffuse textures
+std::map<unsigned int, std::shared_ptr<ppgso::Texture>> ModelLoader::loadTextures(
+    const ppgso::Mesh_Assimp* mesh) {
+
+    auto allTextures = loadAllTextures(mesh);
+    std::map<unsigned int, std::shared_ptr<ppgso::Texture>> diffuseOnly;
+
+    for (const auto& pair : allTextures) {
+        diffuseOnly[pair.first] = pair.second.diffuse;
+    }
+
+    return diffuseOnly;
 }

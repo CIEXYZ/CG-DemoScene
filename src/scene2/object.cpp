@@ -16,7 +16,17 @@
 Object::Object(const std::string& modelPath) {
     shader = std::make_unique<ppgso::Shader>(diffuse_vert_glsl, diffuse_frag_glsl);
     mesh = std::make_shared<ppgso::Mesh_Assimp>(modelPath);
-    materialTextures = ModelLoader::loadTextures(mesh.get());
+
+    auto allTextures = ModelLoader::loadAllTextures(mesh.get());
+
+    for (const auto& pair : allTextures) {
+        materialTextures[pair.first] = pair.second.diffuse;
+        normalMaps[pair.first] = pair.second.normal;
+        if (pair.second.specular) {
+            specularMaps[pair.first] = pair.second.specular;
+        }
+    }
+
     ownsMesh = true;
 }
 
@@ -32,12 +42,23 @@ Object::Object(std::shared_ptr<ppgso::Mesh_Assimp> sharedMesh, const std::string
         const aiScene* scene = mesh->getScene();
         if (scene) {
             for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
-                materialTextures[i] = ModelLoader::loadTextureFile(texturePath);
+                materialTextures[i] = texture;
+
+                std::string normalPath = ModelLoader::findNormalMapByName(texturePath, mesh->getBasePath());
+                if (!normalPath.empty()) {
+                    normalMaps[i] = ModelLoader::loadTextureFile(normalPath);
+                } else {
+                    normalMaps[i] = ModelLoader::createDefaultNormalMap();
+                }
             }
         }
     } else {
         // If custom texture fails, use default textures from mesh
-        materialTextures = ModelLoader::loadTextures(mesh.get());
+        auto allTextures = ModelLoader::loadAllTextures(mesh.get());
+        for (const auto& pair : allTextures) {
+            materialTextures[pair.first] = pair.second.diffuse;
+            normalMaps[pair.first] = pair.second.normal;
+        }
     }
 }
 
@@ -65,6 +86,19 @@ bool Object::isMeshTransparent(const std::string& meshName) const {
 
 void Object::setShader(const std::string& vertShader, const std::string& fragShader) {
     shader = std::make_unique<ppgso::Shader>(vertShader, fragShader);
+}
+
+void Object::setNormalMap(unsigned int materialIndex, const std::string& normalMapPath) {
+    std::cout << "Loading normal map for material " << materialIndex << ": " << normalMapPath << std::endl;
+
+    auto normalTexture = ModelLoader::loadTextureFile(normalMapPath);
+    if (normalTexture) {
+        normalMaps[materialIndex] = normalTexture;
+        std::cout << "Normal map loaded successfully" << std::endl;
+    } else {
+        std::cerr << "Failed to load normal map: " << normalMapPath << std::endl;
+        normalMaps[materialIndex] = ModelLoader::createDefaultNormalMap();
+    }
 }
 
 void Object::update(Scene &scene, float dt) {
@@ -293,13 +327,16 @@ void Object::render(Scene &scene) {
         shader->setUniform(base + ".outerCutOff", scene.spotLights[i].outerCutOff);
         shader->setUniform(base + ".constant", scene.spotLights[i].constant);
         shader->setUniform(base + ".linear", scene.spotLights[i].linear);
+        shader->setUniform(base + ".quadratic", scene.spotLights[i].quadratic);
     }
 
      //LIGHTING OPTIONS
     shader->setUniform("useBlinnPhong", scene.useBlinnPhong);
+    shader->setUniform("TextureOffset", glm::vec2(0.0f, 0.0f));
+    shader->setUniform("useNormalMap", useNormalMapping);
 
-    shader->setUniform("testLightPos", scene.pointLights[0].position);
-    shader->setUniform("testLightColor", glm::vec3(1.0f, 0.0f, 0.0f));
+    // shader->setUniform("testLightPos", scene.pointLights[0].position);
+    // shader->setUniform("testLightColor", glm::vec3(1.0f, 0.0f, 0.0f));
 
     // glm::vec3 lightDirection = glm::normalize(glm::vec3(5.0f, 5.0f, 5.0f)); //TODO: Global lightning (potom pouzivat lightDirection zo scene.h)
     // shader->setUniform("LightDirection", lightDirection);
@@ -320,10 +357,18 @@ void Object::render(Scene &scene) {
         // Skip transparent meshes in first pass
         if (isTransparent || billboarding || forceTransparent) continue;
 
-        // Set texture
+        // Set diffuse texture
         auto it = materialTextures.find(mesh->getMaterialIndex(i));
         if (it != materialTextures.end()) {
             shader->setUniform("Texture", *(it->second));
+        }
+
+        // Set normal map if using normal mapping
+        if (useNormalMapping) {
+            auto normalIt = normalMaps.find(mesh->getMaterialIndex(i));
+            if (normalIt != normalMaps.end()) {
+                shader->setUniform("NormalMap", *(normalIt->second));
+            }
         }
 
         mesh->renderSingleMesh(i);
@@ -373,10 +418,18 @@ void Object::render(Scene &scene) {
 
     // Render transparent meshes in sorted order
     for (const auto& meshInfo : transparentMeshes) {
-        // Set texture
+        // Set diffuse texture
         auto it = materialTextures.find(mesh->getMaterialIndex(meshInfo.index));
         if (it != materialTextures.end()) {
             shader->setUniform("Texture", *(it->second));
+        }
+
+        // Set normal map if using normal mapping
+        if (useNormalMapping) {
+            auto normalIt = normalMaps.find(mesh->getMaterialIndex(meshInfo.index));
+            if (normalIt != normalMaps.end()) {
+                shader->setUniform("NormalMap", *(normalIt->second));
+            }
         }
 
         mesh->renderSingleMesh(meshInfo.index);

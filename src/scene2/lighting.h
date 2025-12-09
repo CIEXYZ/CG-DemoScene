@@ -89,7 +89,7 @@ struct SpotLight {
     float linear = 0.09f;
     float quadratic = 0.032f;
 
-    // Helper: Set spotlight angle
+    //Set spotlight angle
     void setAngle(float innerDegrees, float outerDegrees) {
         cutOff = glm::cos(glm::radians(innerDegrees));
         outerCutOff = glm::cos(glm::radians(outerDegrees));
