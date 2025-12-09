@@ -22,6 +22,7 @@ public:
   DirectionalLight directionalLight;
   std::vector<PointLight> pointLights;
   std::vector<SpotLight> spotLights;
+  std::shared_ptr<Object> building; // needed for referencing building for light positions
 
   bool useDirLight = true;
   bool useBlinnPhong = true;

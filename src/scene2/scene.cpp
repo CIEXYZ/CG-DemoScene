@@ -67,6 +67,7 @@ void Scene::updateCamera(float dt) {
 void Scene::render() {
   for ( auto& obj : objects )
     obj->render(*this);
+
 }
 
 void Scene::renderGrid() {
@@ -78,103 +79,91 @@ void Scene::renderGrid() {
 }
 
 void Scene::setupLighting() {
-    // ========================================
+
     // DEFAULT MATERIAL
-    // ========================================
     defaultMaterial.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
     defaultMaterial.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
     defaultMaterial.specular = glm::vec3(0.5f, 0.5f, 0.5f);
     defaultMaterial.shininess = 32.0f;
 
-    // ========================================
-    // DIRECTIONAL LIGHT (Sun/Moon)
-    // ========================================
+
+    // DIRECTIONAL LIGHT
     directionalLight.direction = glm::normalize(glm::vec3(-0.2f, -1.0f, -0.3f));
     directionalLight.ambient = glm::vec3(0.15f, 0.15f, 0.2f);   // Slight blue ambient
     directionalLight.diffuse = glm::vec3(0.4f, 0.4f, 0.5f);     // Soft diffuse
     directionalLight.specular = glm::vec3(0.5f, 0.5f, 0.5f);
 
-    // ========================================
-    // POINT LIGHTS (Bar/Club colored lights)
-    // ========================================
 
-    // RED light (left bar area)
+    // POINT LIGHTS (Bar/Club colored lights)
+    auto spotLight = building->getMesh()->getMeshBounds("SwivelLightGlow2_M_LightsMediumProps_0");
+    glm::vec3 spotLightPosition = building->position + (spotLight.center * building->scale);
+    // RED light
     PointLight redLight;
-    redLight.position = glm::vec3(-3.0f, 2.5f, 0.0f);
-    redLight.ambient = glm::vec3(0.1f, 0.0f, 0.0f);
+    redLight.position = glm::vec3(1.0f);//spotLightPosition + glm::vec3(-2.f, .0f, 0.0f);
+    redLight.ambient = glm::vec3(0.5f, 0.0f, 0.0f);
     redLight.diffuse = glm::vec3(1.0f, 0.2f, 0.2f);  // Bright red
     redLight.specular = glm::vec3(1.0f, 0.2f, 0.2f);
-    redLight.setDistance(20);  // Cover 20 units
+    redLight.setDistance(150);
     pointLights.push_back(redLight);
 
-    // GREEN light (center bar)
-    PointLight greenLight;
-    greenLight.position = glm::vec3(0.0f, 2.5f, 0.0f);
-    greenLight.ambient = glm::vec3(0.0f, 0.1f, 0.0f);
-    greenLight.diffuse = glm::vec3(0.2f, 1.0f, 0.2f);  // Bright green
-    greenLight.specular = glm::vec3(0.2f, 1.0f, 0.2f);
-    greenLight.setDistance(20);
-    pointLights.push_back(greenLight);
+    //
+    // PointLight greenLight;
+    // greenLight.position = spotLightPosition;//glm::vec3(-3.2f, 2.0f, 0.0f);
+    // greenLight.ambient = glm::vec3(0.0f, 0.1f, 0.0f);
+    // greenLight.diffuse = glm::vec3(0.2f, 1.0f, 0.2f);  // Bright green
+    // greenLight.specular = glm::vec3(0.2f, 1.0f, 0.2f);
+    // greenLight.setDistance(20);
+    // pointLights.push_back(greenLight);
+    //
+    //
+    // PointLight blueLight;
+    // blueLight.position =spotLightPosition + glm::vec3(2.f, 0.0f, 0.0f);// glm::vec3(-3.2f, 2.0f, 0.0f);
+    // blueLight.ambient = glm::vec3(0.0f, 0.0f, 0.1f);
+    // blueLight.diffuse = glm::vec3(0.2f, 0.2f, 1.0f);  // Bright blue
+    // blueLight.specular = glm::vec3(0.2f, 0.2f, 1.0f);
+    // blueLight.setDistance(20);
+    // pointLights.push_back(blueLight);
 
-    // BLUE light (right bar area)
-    PointLight blueLight;
-    blueLight.position = glm::vec3(3.0f, 2.5f, 0.0f);
-    blueLight.ambient = glm::vec3(0.0f, 0.0f, 0.1f);
-    blueLight.diffuse = glm::vec3(0.2f, 0.2f, 1.0f);  // Bright blue
-    blueLight.specular = glm::vec3(0.2f, 0.2f, 1.0f);
-    blueLight.setDistance(20);
-    pointLights.push_back(blueLight);
-
-    // WARM WHITE light (main ceiling)
-    PointLight ceilingLight;
-    ceilingLight.position = glm::vec3(0.0f, 4.5f, 2.0f);
-    ceilingLight.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
-    ceilingLight.diffuse = glm::vec3(0.9f, 0.85f, 0.7f);  // Warm white
-    ceilingLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-    ceilingLight.setDistance(50);  // Large coverage
-    pointLights.push_back(ceilingLight);
-
-    // ========================================
-    // SPOTLIGHTS (DJ booth, focused areas)
-    // ========================================
-
-    // DJ Spotlight
-    SpotLight djSpot;
-    djSpot.position = glm::vec3(0.0f, 4.0f, -3.5f);
-    djSpot.direction = glm::vec3(0.0f, -1.0f, 0.2f);
-    djSpot.ambient = glm::vec3(0.0f, 0.0f, 0.0f);
-    djSpot.diffuse = glm::vec3(1.0f, 1.0f, 0.8f);  // Warm spotlight
-    djSpot.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-    djSpot.setAngle(12.5f, 17.5f);  // Inner 12.5°, outer 17.5°
-    djSpot.constant = 1.0f;
-    djSpot.linear = 0.09f;
-    djSpot.quadratic = 0.032f;
-    spotLights.push_back(djSpot);
-
-    // Dance floor spotlight (purple)
-    SpotLight danceSpot;
-    danceSpot.position = glm::vec3(0.0f, 5.0f, 2.0f);
-    danceSpot.direction = glm::vec3(0.0f, -1.0f, 0.0f);
-    danceSpot.ambient = glm::vec3(0.0f, 0.0f, 0.0f);
-    danceSpot.diffuse = glm::vec3(0.8f, 0.2f, 1.0f);  // Purple
-    danceSpot.specular = glm::vec3(0.8f, 0.2f, 1.0f);
-    danceSpot.setAngle(15.0f, 20.0f);
-    danceSpot.constant = 1.0f;
-    danceSpot.linear = 0.07f;
-    danceSpot.quadratic = 0.017f;
-    spotLights.push_back(danceSpot);
-
-    std::cout << "Lighting setup complete!" << std::endl;
-    std::cout << "   - 1 Directional light" << std::endl;
-    std::cout << "   - " << pointLights.size() << " Point lights" << std::endl;
-    std::cout << "   - " << spotLights.size() << " Spotlights" << std::endl;
+    //
+    // PointLight ceilingLight;
+    // ceilingLight.position = glm::vec3(0.0f, 4.5f, 2.0f);
+    // ceilingLight.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
+    // ceilingLight.diffuse = glm::vec3(0.9f, 0.85f, 0.7f);  // Warm white
+    // ceilingLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+    // ceilingLight.setDistance(50);  // Large coverage
+    // pointLights.push_back(ceilingLight);
+    //
+    // // SPOTLIGHTS
+    // // DJ Spotlight
+    // SpotLight djSpot;
+    // djSpot.position = glm::vec3(0.0f, 4.0f, -3.5f);
+    // djSpot.direction = glm::vec3(0.0f, -1.0f, 0.2f);
+    // djSpot.ambient = glm::vec3(0.0f, 0.0f, 0.0f);
+    // djSpot.diffuse = glm::vec3(1.0f, 1.0f, 0.8f);  // Warm spotlight
+    // djSpot.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+    // djSpot.setAngle(12.5f, 17.5f);  // Inner 12.5°, outer 17.5°
+    // djSpot.constant = 1.0f;
+    // djSpot.linear = 0.09f;
+    // djSpot.quadratic = 0.032f;
+    // spotLights.push_back(djSpot);
+    //
+    // //Dance floor
+    // SpotLight danceSpot;
+    // danceSpot.position = glm::vec3(0.0f, 5.0f, 2.0f);
+    // danceSpot.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+    // danceSpot.ambient = glm::vec3(0.0f, 0.0f, 0.0f);
+    // danceSpot.diffuse = glm::vec3(0.8f, 0.2f, 1.0f);  // Purple
+    // danceSpot.specular = glm::vec3(0.8f, 0.2f, 1.0f);
+    // danceSpot.setAngle(15.0f, 20.0f);
+    // danceSpot.constant = 1.0f;
+    // danceSpot.linear = 0.07f;
+    // danceSpot.quadratic = 0.017f;
+    // spotLights.push_back(danceSpot);
 }
 
 
 void Scene::updateLights(float dt) {
-  // ✅ Optional: Animate lights (pulsing, moving, color cycling)
-
-  // Example: Pulse the point lights
+  //Pulse for point lights
   static float time = 0.0f;
   time += dt;
 

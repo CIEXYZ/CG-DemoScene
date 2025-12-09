@@ -71,7 +71,7 @@ public:
   void clearTorque() { torque = glm::vec3(0.0f); }
 
 
-protected:
+// protected:
   void generateModelMatrix();
 
   std::shared_ptr<ppgso::Mesh_Assimp> mesh;

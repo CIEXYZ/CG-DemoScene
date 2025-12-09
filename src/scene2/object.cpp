@@ -244,6 +244,7 @@ glm::vec3 findMeshCenterByName(const aiScene* scene, const std::string& meshName
 void Object::render(Scene &scene) {
     if (!shouldRender){return;}
     shader->use();
+
     //BASIC
     shader->setUniform("ProjectionMatrix", scene.camera->projectionMatrix);
     shader->setUniform("ViewMatrix", scene.camera->viewMatrix);
@@ -297,6 +298,8 @@ void Object::render(Scene &scene) {
      //LIGHTING OPTIONS
     shader->setUniform("useBlinnPhong", scene.useBlinnPhong);
 
+    shader->setUniform("testLightPos", scene.pointLights[0].position);
+    shader->setUniform("testLightColor", glm::vec3(1.0f, 0.0f, 0.0f));
 
     // glm::vec3 lightDirection = glm::normalize(glm::vec3(5.0f, 5.0f, 5.0f)); //TODO: Global lightning (potom pouzivat lightDirection zo scene.h)
     // shader->setUniform("LightDirection", lightDirection);
