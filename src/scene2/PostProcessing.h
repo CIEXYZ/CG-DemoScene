@@ -8,7 +8,9 @@ enum class PostProcessingMode {
     NONE = 0,
     GRAYSCALE = 1,      // 1b - Basic per-pixel filter
     BLUR = 2,           // 2b - Convolution filter
-    BLOOM = 3           // 4b - Advanced bloom effect
+    BLOOM = 3,          // 4b - Advanced bloom effect
+    BLOOM_DEBUG = 4,    // Debug: show only bright areas
+    SHADOW_DEBUG = 5    // Debug: show shadow map
 };
 
 class PostProcessing {
@@ -25,6 +27,14 @@ public:
 
     void resize(int width, int height);
 
+    // Set shadow map texture for debug visualization
+    void setShadowMapTexture(GLuint texture) { shadowMapTexture = texture; }
+
+    // Bloom parameters
+    void setBloomThreshold(float threshold) { bloomThreshold = threshold; }
+    void setBloomStrength(float strength) { bloomStrength = strength; }
+    void setBloomBlurPasses(int passes) { bloomBlurPasses = passes; }
+
 private:
     void setupFramebuffers();
     void setupShaders();
@@ -33,9 +43,16 @@ private:
     void renderGrayscale();
     void renderBlur();
     void renderBloom();
+    void renderBloomDebug();
+    void renderShadowDebug();
 
     int width, height;
     PostProcessingMode currentMode = PostProcessingMode::NONE;
+
+    // Bloom parameters
+    float bloomThreshold = 0.8f;
+    float bloomStrength = 0.3f;
+    int bloomBlurPasses = 10;
 
     // Main framebuffer (scene renders here)
     GLuint mainFBO;
@@ -54,4 +71,7 @@ private:
 
     // Screen quad
     GLuint quadVAO, quadVBO;
+
+    // Shadow map texture for debug visualization
+    GLuint shadowMapTexture = 0;
 };

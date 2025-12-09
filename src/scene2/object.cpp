@@ -369,6 +369,15 @@ void Object::render(Scene &scene) {
     shader->setUniform("TextureOffset", glm::vec2(0.0f, 0.0f));
     shader->setUniform("useNormalMap", useNormalMapping);
 
+    if (scene.shadowMap && scene.shadowMap->isEnabled()) {
+        shader->setUniform("useShadows", true);
+        shader->setUniform("lightSpaceMatrix", scene.shadowMap->getLightSpaceMatrix());
+        scene.shadowMap->bindShadowMap(2);
+        shader->setUniform("shadowMap", 2);
+    } else {
+        shader->setUniform("useShadows", false);
+    }
+
     // shader->setUniform("testLightPos", scene.pointLights[0].position);
     // shader->setUniform("testLightColor", glm::vec3(1.0f, 0.0f, 0.0f));
 

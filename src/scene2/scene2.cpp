@@ -17,6 +17,7 @@
 #include "Crowd.h"
 #include "Skybox.h"
 #include "PostProcessing.h"
+#include "ShadowMap.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -1034,7 +1035,12 @@ public:
 
     glViewport(0, 0, WIDTH, HEIGHT);
 
+    // Initialize post-processing BEFORE scene (needs OpenGL context)
     postProcessing = std::make_unique<PostProcessing>(WIDTH, HEIGHT);
+
+    // Initialize shadow mapping
+    scene.shadowMap = std::make_unique<ShadowMap>(2048, 2048);
+    std::cout << "Shadow mapping initialized" << std::endl;
 
     initScene();
 
@@ -1106,6 +1112,37 @@ public:
         postProcessing->setMode(PostProcessingMode::BLOOM);
         std::cout << "Post-processing: BLOOM" << std::endl;
       }
+      if (key == GLFW_KEY_5) {
+        postProcessing->setMode(PostProcessingMode::BLOOM_DEBUG);
+        std::cout << "Post-processing: BLOOM DEBUG (shows only bright areas)" << std::endl;
+      }
+      if (key == GLFW_KEY_6) {
+        if (scene.shadowMap) {
+          postProcessing->setShadowMapTexture(scene.shadowMap->getShadowTexture());
+          postProcessing->setMode(PostProcessingMode::SHADOW_DEBUG);
+          std::cout << "Post-processing: SHADOW MAP DEBUG (visualizing depth buffer)" << std::endl;
+        } else {
+          std::cout << "Shadow map not available!" << std::endl;
+        }
+      }
+
+      // Bloom adjustment controls
+      if (key == GLFW_KEY_EQUAL || key == GLFW_KEY_KP_ADD) {  // + key
+        postProcessing->setBloomStrength(0.5f);
+        std::cout << "Bloom strength increased to 0.5" << std::endl;
+      }
+      if (key == GLFW_KEY_MINUS || key == GLFW_KEY_KP_SUBTRACT) {  // - key
+        postProcessing->setBloomStrength(0.1f);
+        std::cout << "Bloom strength decreased to 0.1" << std::endl;
+      }
+      if (key == GLFW_KEY_LEFT_BRACKET) {  // [ key - lower threshold (more bloom)
+        postProcessing->setBloomThreshold(0.5f);
+        std::cout << "Bloom threshold lowered to 0.5" << std::endl;
+      }
+      if (key == GLFW_KEY_RIGHT_BRACKET) {  // ] key - raise threshold (less bloom)
+        postProcessing->setBloomThreshold(1.0f);
+        std::cout << "Bloom threshold raised to 1.0" << std::endl;
+      }
 
       if (key == GLFW_KEY_F) {
         // Toggle fullscreen
@@ -1170,6 +1207,49 @@ public:
     float dt = currentTime - time;
     time = currentTime;
 
+    // ========== SHADOW PASS ==========
+    if (scene.shadowMap && scene.shadowMap->isEnabled()) {
+      // Begin shadow pass - render scene from light's perspective
+      glm::vec3 sceneCenter(0.0f, 2.0f, 0.0f);  // Center of your scene
+      float sceneRadius = 25.0f;  // Adjust based on your scene size
+
+      scene.shadowMap->beginShadowPass(
+        scene.directionalLight.direction,
+        sceneCenter,
+        sceneRadius
+      );
+
+      // Render all objects to shadow map
+      auto shadowShader = scene.shadowMap->getShadowShader();
+      shadowShader->use();
+
+      for (auto& obj : scene.objects) {
+        // Skip if no mesh, not rendering, transparent, or billboard
+        if (!obj->mesh || !obj->shouldRender || obj->forceTransparent || obj->billboarding) {
+          continue;
+        }
+
+        shadowShader->setUniform("ModelMatrix", obj->modelMatrix);
+        shadowShader->setUniform("lightSpaceMatrix", scene.shadowMap->getLightSpaceMatrix());
+
+        // Render all meshes of this object
+        size_t meshCount = obj->mesh->getMeshCount();
+        for (size_t i = 0; i < meshCount; ++i) {
+          // Skip transparent meshes
+          if (obj->isMeshTransparent(obj->mesh->getMeshName(i))) {
+            continue;
+          }
+          obj->mesh->renderSingleMesh(i);
+        }
+      }
+
+      scene.shadowMap->endShadowPass();
+    }
+
+    // ========== NORMAL RENDER PASS ==========
+    // Restore viewport for main rendering
+    glViewport(0, 0, currentWidth, currentHeight);
+
     // Begin rendering to post-processing framebuffer
     if (postProcessing) {
       postProcessing->beginFrame();
@@ -1181,7 +1261,7 @@ public:
     scene.skybox->render(scene.camera->viewMatrix, scene.camera->projectionMatrix);
 
     scene.update(dt);
-    scene.render();
+    scene.render();  // This now includes shadows
 
     // Render grid if enabled
     if (showGrid) {
@@ -1195,6 +1275,7 @@ public:
       scene.renderGrid();
     }
 
+    // End framebuffer rendering and apply post-processing
     if (postProcessing) {
       postProcessing->endFrame();
       postProcessing->render();
@@ -1220,6 +1301,10 @@ int main() {
   std::cout << "2 - Grayscale filter" << std::endl;
   std::cout << "3 - Blur effect" << std::endl;
   std::cout << "4 - Bloom effect" << std::endl;
+  std::cout << "5 - Bloom debug (shows bright areas only)" << std::endl;
+  std::cout << "6 - Shadow map debug (visualize depth buffer)" << std::endl;
+  std::cout << "+/- - Increase/Decrease bloom strength" << std::endl;
+  std::cout << "[/] - Lower/Raise bloom threshold" << std::endl;
   std::cout << "=================" << std::endl;
 
   SceneWindow window;

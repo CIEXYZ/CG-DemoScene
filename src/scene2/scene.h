@@ -10,6 +10,7 @@
 #include "grid.h"
 #include "lighting.h"
 #include "Skybox.h"
+#include "ShadowMap.h"
 
 class Timeline;
 
@@ -53,6 +54,8 @@ public:
   std::list<std::shared_ptr<Object>> objects;
 
   std::unique_ptr<Skybox> skybox;
+
+  std::unique_ptr<ShadowMap> shadowMap;
 
   std::map< int, int > keyboard;
 

@@ -53,6 +53,11 @@ uniform sampler2D Texture;
 uniform sampler2D NormalMap;
 uniform bool useNormalMap;
 
+// Shadow mapping
+uniform sampler2D shadowMap;
+uniform mat4 lightSpaceMatrix;
+uniform bool useShadows;
+
 // Texture array for instanced rendering
 uniform sampler2D TextureArray[16];
 uniform int TextureArraySize;
@@ -102,6 +107,8 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir, vec3 texColor
 vec3 CalcPointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir, vec3 texColor);
 vec3 CalcSpotLight(SpotLight light, vec3 norm, vec3 fragPos, vec3 viewDir, vec3 texColor);
 vec3 getNormal();
+
+float calculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir);
 
 void main() {
     // Sample texture with offset
@@ -181,6 +188,13 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir, vec3 texColor
     // Ambient
     vec3 ambient = light.ambient * material.ambient * texColor;
 
+    // Calculate shadow
+        float shadow = 0.0;
+        if (useShadows) {
+            vec4 fragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
+            shadow = calculateShadow(fragPosLightSpace, norm, lightDir);
+        }
+
     // Diffuse
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = light.diffuse * (diff * material.diffuse) * texColor;
@@ -196,7 +210,8 @@ vec3 CalcDirLight(DirectionalLight light, vec3 norm, vec3 viewDir, vec3 texColor
     }
     vec3 specular = light.specular * (spec * material.specular);
 
-    return ambient + diffuse + specular;
+    // Apply shadow (only to diffuse and specular, not ambient)
+    return ambient + (1.0 - shadow) * (diffuse + specular);
 }
 
 vec3 CalcPointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir, vec3 texColor) {
@@ -269,4 +284,37 @@ vec3 CalcSpotLight(SpotLight light, vec3 norm, vec3 fragPos, vec3 viewDir, vec3 
     specular *= attenuation;
 
     return ambient + diffuse + specular;
+}
+
+float calculateShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir) {
+    // Perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+    // Transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+
+    // Check if fragment is outside light frustum
+    if (projCoords.z > 1.0) {
+        return 0.0;
+    }
+
+    // Get depth from shadow map
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    // Bias to prevent shadow acne
+    float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.001);
+
+    // PCF (Percentage Closer Filtering) for softer shadows
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for(int x = -1; x <= 1; ++x) {
+        for(int y = -1; y <= 1; ++y) {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+
+    return shadow;
 }

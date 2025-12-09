@@ -103,6 +103,7 @@ set(PPGSO_SHADER_SRC
         shader/bloom_comb_frag.glsl
         shader/skybox_vert.glsl
         shader/skybox_frag.glsl
+        shader/shadow_vert.glsl shader/shadow_frag.glsl
 )
 add_resources(shaders ${PPGSO_SHADER_SRC})
 
@@ -214,6 +215,8 @@ add_executable(scene2
         src/scene2/PostProcessing.h
         src/scene2/Skybox.cpp
         src/scene2/Skybox.h
+        src/scene2/ShadowMap.cpp
+        src/scene2/ShadowMap.h
 )
 target_link_libraries(scene2 ppgso shaders)
 install (TARGETS scene2 DESTINATION .)

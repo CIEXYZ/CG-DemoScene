@@ -74,7 +74,7 @@ void PostProcessing::setupFramebuffers() {
 }
 
 void PostProcessing::setupShaders() {
-    // Compile shaders
+    // Compile shaders - all use grayscale_vert_glsl for the quad
     grayscaleShader = std::make_unique<ppgso::Shader>(grayscale_vert_glsl, grayscale_frag_glsl);
 
     blurShader = std::make_unique<ppgso::Shader>(grayscale_vert_glsl, blur_frag_glsl);
@@ -94,7 +94,7 @@ void PostProcessing::setupQuad() {
          1.0f, -1.0f,  1.0f, 0.0f,
          1.0f,  1.0f,  1.0f, 1.0f
     };
-    
+
     glGenVertexArrays(1, &quadVAO);
     glGenBuffers(1, &quadVBO);
     glBindVertexArray(quadVAO);
@@ -126,7 +126,7 @@ void PostProcessing::render() {
         glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
         return;
     }
-    
+
     switch (currentMode) {
         case PostProcessingMode::GRAYSCALE:
             renderGrayscale();
@@ -136,6 +136,12 @@ void PostProcessing::render() {
             break;
         case PostProcessingMode::BLOOM:
             renderBloom();
+            break;
+        case PostProcessingMode::BLOOM_DEBUG:
+            renderBloomDebug();
+            break;
+        case PostProcessingMode::SHADOW_DEBUG:
+            renderShadowDebug();
             break;
         default:
             break;
@@ -202,7 +208,7 @@ void PostProcessing::renderBloom() {
     glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[0]);
     bloomExtractShader->use();
     bloomExtractShader->setUniform("screenTexture", 0);
-    bloomExtractShader->setUniform("threshold", 1.0f);
+    bloomExtractShader->setUniform("threshold", bloomThreshold);
 
     glBindVertexArray(quadVAO);
     glActiveTexture(GL_TEXTURE0);
@@ -213,7 +219,7 @@ void PostProcessing::renderBloom() {
     bool horizontal = true;
     blurShader->use();
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < bloomBlurPasses; i++) {
         glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
         blurShader->setUniform("horizontal", horizontal);
         blurShader->setUniform("screenTexture", 0);
@@ -231,7 +237,7 @@ void PostProcessing::renderBloom() {
     bloomCombineShader->use();
     bloomCombineShader->setUniform("sceneTexture", 0);
     bloomCombineShader->setUniform("bloomTexture", 1);
-    bloomCombineShader->setUniform("bloomStrength", 0.04f);
+    bloomCombineShader->setUniform("bloomStrength", bloomStrength);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mainColorTexture);
@@ -243,6 +249,67 @@ void PostProcessing::renderBloom() {
     glBindVertexArray(0);
 
     glEnable(GL_DEPTH_TEST);
+
+    // Debug output
+    static bool debugPrinted = false;
+    if (!debugPrinted) {
+        std::cout << "Bloom settings: threshold=" << bloomThreshold
+                  << ", strength=" << bloomStrength
+                  << ", passes=" << bloomBlurPasses << std::endl;
+        debugPrinted = true;
+    }
+}
+
+void PostProcessing::renderBloomDebug() {
+    glDisable(GL_DEPTH_TEST);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    bloomExtractShader->use();
+    bloomExtractShader->setUniform("screenTexture", 0);
+    bloomExtractShader->setUniform("threshold", bloomThreshold);
+
+    glBindVertexArray(quadVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mainColorTexture);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
+
+    std::cout << "Bloom debug: showing bright areas with threshold=" << bloomThreshold << std::endl;
+}
+
+void PostProcessing::renderShadowDebug() {
+    // Visualize the shadow map depth texture
+    glDisable(GL_DEPTH_TEST);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    if (shadowMapTexture == 0) {
+        std::cerr << "No shadow map texture set!" << std::endl;
+        return;
+    }
+
+    // Use grayscale shader to visualize depth
+    grayscaleShader->use();
+    grayscaleShader->setUniform("screenTexture", 0);
+
+    glBindVertexArray(quadVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
+
+    static bool debugPrinted = false;
+    if (!debugPrinted) {
+        std::cout << "Shadow map debug: visualizing depth buffer (white=far, black=near)" << std::endl;
+        debugPrinted = true;
+    }
 }
 
 void PostProcessing::resize(int newWidth, int newHeight) {

@@ -41,7 +41,7 @@
 - [X] (1b) Implementácia Blinn-Phongovho modifikovaného osvetľovacieho modelu
 - [ ] (1b) HDR zobrazenie s použitím mapovania tónov (tone mapping) a gama korekcie
 - [ ] (1b) Tiene implementované jednoduchým spôsobom
-- [ ] (4b) Tiene implementované pomocou shadow-maps
+- [X] (4b) Tiene implementované pomocou shadow-maps
 
 ### Post-processing. Zobrazenie scény s aplikovaným post-processing filtrom
 - [X] (1b) Základný per-pixel filter napr. grayscale
