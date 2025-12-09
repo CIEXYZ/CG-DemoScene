@@ -825,7 +825,7 @@ private:
     scene.timeline->addEvent(new ObjectMovementEvent(
       38.0f,
       "barman",
-      glm::vec3(-3.75f, 0.03f, -0.01f),
+      glm::vec3(-3.75f, 0.03f, -0.005f),
       glm::vec3(-1.6f, 0.0f, 1.5f),
       0.0f,
       "Remove barman from scene"
