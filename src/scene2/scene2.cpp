@@ -46,6 +46,10 @@ private:
   // Window size tracking
   int currentWidth = WIDTH;
   int currentHeight = HEIGHT;
+  int windowedWidth = WIDTH;
+  int windowedHeight = HEIGHT;
+  int windowedPosX = 100;
+  int windowedPosY = 100;
 
   //Loading all models
   void loadObjects() {
@@ -126,7 +130,7 @@ private:
     });
 
     crowd->addPersonType(womanNpc, {
-        "models/people/female/textures/female_baseColor.png"
+        "models/people/female/textures/secretary_mat_baseColor.png"
     });
 
     //Generate crowd with gap in center (for line formation)
@@ -506,6 +510,12 @@ private:
     currentWidth = width;
     currentHeight = height;
 
+    // If not fullscreen, save as windowed size
+    if (glfwGetWindowMonitor(window) == nullptr) {
+      windowedWidth = width;
+      windowedHeight = height;
+    }
+
     // Update viewport
     glViewport(0, 0, width, height);
 
@@ -517,6 +527,27 @@ private:
         0.1f,
         100.0f
       );
+    }
+
+    // Resize post processing framebuffer
+    if (postProcessing) {
+      // Store current state
+      auto currentMode = postProcessing->getMode();
+      float bloomStrength = postProcessing->bloomStrength;
+      float bloomThreshold = postProcessing->bloomThreshold;
+
+      // Recreate with new size
+      postProcessing = std::make_unique<PostProcessing>(width, height);
+
+      // Restore state
+      postProcessing->setMode(currentMode);
+      postProcessing->setBloomStrength(bloomStrength);
+      postProcessing->setBloomThreshold(bloomThreshold);
+
+      // Reapply shadow map
+      if (scene.shadowMap && currentMode == PostProcessingMode::SHADOW_DEBUG) {
+        postProcessing->setShadowMapTexture(scene.shadowMap->getShadowTexture());
+      }
     }
   }
 
@@ -1150,13 +1181,17 @@ public:
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
         if (glfwGetWindowMonitor(window) == nullptr) {
+          // Save current windowed size and position
+          glfwGetWindowPos(window, &windowedPosX, &windowedPosY);
+          glfwGetWindowSize(window, &windowedWidth, &windowedHeight);
+
           // Go fullscreen
           glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-          std::cout << "Fullscreen mode" << std::endl;
+          std::cout << "Fullscreen mode: " << mode->width << "x" << mode->height << std::endl;
         } else {
-          // Go windowed
-          glfwSetWindowMonitor(window, nullptr, 100, 100, WIDTH, HEIGHT, 0);
-          std::cout << "Windowed mode" << std::endl;
+          // Go windowed - restore previous size
+          glfwSetWindowMonitor(window, nullptr, windowedPosX, windowedPosY, windowedWidth, windowedHeight, 0);
+          std::cout << "Windowed mode: " << windowedWidth << "x" << windowedHeight << std::endl;
         }
       }
 

@@ -35,6 +35,11 @@ public:
     void setBloomStrength(float strength) { bloomStrength = strength; }
     void setBloomBlurPasses(int passes) { bloomBlurPasses = passes; }
 
+    // Bloom parameters
+    float bloomThreshold = 0.8f;
+    float bloomStrength = 0.3f;
+    int bloomBlurPasses = 10;
+
 private:
     void setupFramebuffers();
     void setupShaders();
@@ -48,11 +53,6 @@ private:
 
     int width, height;
     PostProcessingMode currentMode = PostProcessingMode::NONE;
-
-    // Bloom parameters
-    float bloomThreshold = 0.8f;
-    float bloomStrength = 0.3f;
-    int bloomBlurPasses = 10;
 
     // Main framebuffer (scene renders here)
     GLuint mainFBO;
